@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
+    <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+        </linearGradient>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#fff" />
+        </marker>
+    </defs>
+    
+    <!-- Phone -->
+    <rect x="50" y="50" width="80" height="120" rx="10" fill="#1e293b" stroke="#334155" stroke-width="3"/>
+    <rect x="60" y="60" width="60" height="100" rx="5" fill="#0f172a"/>
+    <text x="90" y="115" fill="white" font-family="Inter, sans-serif" font-size="14" text-anchor="middle">Phone</text>
+    
+    <!-- Encrypt Box -->
+    <rect x="200" y="70" width="100" height="80" rx="8" fill="url(#grad1)" opacity="0.9"/>
+    <text x="250" y="105" fill="white" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">AES-256</text>
+    <text x="250" y="125" fill="white" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Encrypt</text>
+    
+    <!-- UDP Stream -->
+    <path d="M 320 110 L 480 110" stroke="#334155" stroke-width="4" stroke-dasharray="8 8">
+        <animate attributeName="stroke-dashoffset" from="16" to="0" dur="1s" repeatCount="indefinite"/>
+    </path>
+    <text x="400" y="95" fill="#94a3b8" font-family="Inter, sans-serif" font-size="12" text-anchor="middle">UDP Stream</text>
+    
+    <!-- Lock Icon in middle -->
+    <circle cx="400" cy="110" r="25" fill="#10b981"/>
+    <path d="M 393 105 L 393 100 C 393 95 407 95 407 100 L 407 105 Z" fill="none" stroke="white" stroke-width="2"/>
+    <rect x="390" y="105" width="20" height="15" rx="2" fill="white"/>
+    <text x="400" y="150" fill="#10b981" font-family="Inter, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Your PIN</text>
+    
+    <!-- Decrypt Box -->
+    <rect x="500" y="70" width="100" height="80" rx="8" fill="url(#grad2)" opacity="0.9"/>
+    <text x="550" y="105" fill="white" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">AES-256</text>
+    <text x="550" y="125" fill="white" font-family="Inter, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Decrypt</text>
+    
+    <!-- PC -->
+    <rect x="650" y="60" width="100" height="80" rx="5" fill="#1e293b" stroke="#334155" stroke-width="3"/>
+    <rect x="660" y="70" width="80" height="60" fill="#0f172a"/>
+    <path d="M 670 140 L 730 140 L 740 150 L 660 150 Z" fill="#334155"/>
+    <text x="700" y="110" fill="white" font-family="Inter, sans-serif" font-size="14" text-anchor="middle">PC</text>
+    
+    <!-- Arrows -->
+    <path d="M 140 110 L 190 110" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow)"/>
+    <path d="M 610 110 L 640 110" stroke="#10b981" stroke-width="3" marker-end="url(#arrow)"/>
+</svg>

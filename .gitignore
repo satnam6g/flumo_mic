@@ -1,0 +1,38 @@
+﻿# Flutter & Dart
+.dart_tool/
+.packages
+*.iml
+build/
+pubspec.lock
+
+# Android
+android/.gradle/
+android/.idea/
+android/local.properties
+android/app/build/
+android/gradle/wrapper/gradle-wrapper.jar
+android/*.jks
+android/*.keystore
+
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+dist/
+dist_installer/
+*.exe
+*.log
+venv/
+env/
+.venv/
+
+# VS Code & OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# General
+*.zip
+*.tar.gz
+.env

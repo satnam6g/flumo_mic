@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireless Mic - Secure, Encrypted Wireless Microphone</title>
+    <meta name="description"
+        content="Free wireless microphone app with AES-256 encryption. Turn your Android phone into a secure, PIN-protected mic for Windows. Low-latency, privacy-first.">
+    <meta name="keywords"
+        content="wireless microphone, encrypted audio, secure microphone, AES-256, Android to Windows, PIN protection, privacy microphone">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Favicon -->
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="noise-bg"></div>
+    <div id="scroll-progress"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <i data-lucide="mic" class="text-primary"></i>
+                Wireless Mic
+            </a>
+
+            <div class="nav-links" id="navLinks">
+                <a href="#features">Features</a>
+                <a href="#security">Security</a>
+                <a href="#setup">Setup</a>
+                <a href="#gallery">Gallery</a>
+                <a href="#specs">Specs</a>
+                <a href="#github">Open Source</a>
+            </div>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <i data-lucide="sun" class="light-icon"></i>
+                    <i data-lucide="moon" class="dark-icon"></i>
+                </button>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-bg-gradient"></div>
+
+        <div class="container hero-container">
+            <div class="hero-content animate-up stagger-1">
+                <a href="https://github.com/yourusername/wireless-mic" target="_blank" class="badge">
+                    <i data-lucide="github"></i>
+                    ⭐ Star on GitHub
+                </a>
+
+                <h1>
+                    Turn Your Phone Into a <br>
+                    <span class="text-gradient">Secure Microphone</span>
+                </h1>
+
+                <div class="security-badge-hero">
+                    <i data-lucide="lock"></i> End-to-End Encrypted | PIN-Protected | AES-256
+                </div>
+
+                <p class="hero-subtitle">
+                    Free, open-source, and ultra-low latency audio streaming from Android to Windows. Now with
+                    military-grade encryption to keep your audio completely private on your local network.
+                </p>
+
+                <div class="hero-btns">
+                    <a href="#download" class="btn btn-primary">
+                        <i data-lucide="download"></i>
+                        Download for Windows
+                    </a>
+                    <a href="#download" class="btn btn-secondary">
+                        <i data-lucide="smartphone"></i>
+                        Get Android App
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-visual animate-up stagger-3 float-animation">
+                <div class="mockup-combo">
+                    <!-- PC Mockup -->
+                    <div class="css-mockup-pc">
+                        <div class="pc-header">
+                            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                            <span class="win-title">Wireless Mic Server</span>
+                        </div>
+                        <div class="pc-body" style="padding:0; overflow:hidden;">
+                            <img src="assets/screenshots/windows-client.png" alt="Windows Server Interface"
+                                style="width:100%; height:100%; object-fit:cover; object-position:top;">
+                        </div>
+                    </div>
+
+                    <!-- Phone Mockup -->
+                    <div class="css-mockup-phone">
+                        <div class="phone-notch"></div>
+                        <div class="phone-body" style="padding:0; overflow:hidden;">
+                            <img src="assets/screenshots/android-app.jpg" alt="Android App Interface"
+                                style="width:100%; height:100%; object-fit:cover; object-position:top;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section (Bento Grid) -->
+    <section id="features" class="section-bg-alt">
+        <div class="container">
+            <h2 class="section-title animate-up">Everything You Need</h2>
+            <p class="section-subtitle animate-up">Professional-grade wireless microphone in your pocket</p>
+
+            <div class="bento-grid">
+                <!-- Top 2 Large Cards -->
+                <div class="bento-card large-card animate-up stagger-1" style="grid-area: card1;">
+                    <span class="badge-new">NEW</span>
+                    <div class="icon-wrapper"><i data-lucide="lock"></i></div>
+                    <h3>AES-256 Encrypted Transmission</h3>
+                    <p>Every single audio packet is encrypted in real-time with AES-256 CBC. Only your PC can decrypt
+                        the audio stream using the unique, randomly generated 4-digit PIN.</p>
+                </div>
+
+                <div class="bento-card large-card animate-up stagger-2" style="grid-area: card2;">
+                    <div class="icon-wrapper"><i data-lucide="headphones"></i></div>
+                    <h3>Lossless Studio Quality</h3>
+                    <p>Captures crystal clear 48kHz, 16-bit PCM mono audio directly from your phone's microphone.
+                        Perfect for professional recording, podcasting, and streaming.</p>
+                </div>
+
+                <!-- Bottom 4 Small Cards -->
+                <div class="bento-card animate-up stagger-3" style="grid-area: card3;">
+                    <div class="icon-wrapper"><i data-lucide="zap"></i></div>
+                    <h3>Ultra Low Latency</h3>
+                    <p>Optimized UDP protocol ensures ~20ms real-time audio delay.</p>
+                </div>
+
+                <div class="bento-card animate-up stagger-4" style="grid-area: card4;">
+                    <div class="icon-wrapper"><i data-lucide="wifi"></i></div>
+                    <h3>Wi-Fi & USB</h3>
+                    <p>Connect seamlessly over your local Wi-Fi or USB tethering.</p>
+                </div>
+
+                <div class="bento-card animate-up stagger-5" style="grid-area: card5;">
+                    <div class="icon-wrapper"><i data-lucide="monitor-speaker"></i></div>
+                    <h3>Universal Support</h3>
+                    <p>Acts as a standard Windows microphone for OBS, Zoom, and Discord.</p>
+                </div>
+
+                <div class="bento-card animate-up stagger-6" style="grid-area: card6;">
+                    <div class="icon-wrapper"><i data-lucide="shield-check"></i></div>
+                    <h3>100% Private</h3>
+                    <p>No cloud servers, no accounts. All data stays strictly on your local network.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security Diagram Section -->
+    <section id="security">
+        <div class="container">
+            <h2 class="section-title animate-up">Bank-Level Security</h2>
+            <p class="section-subtitle animate-up">Your voice is for your ears only.</p>
+
+            <div class="encryption-flow animate-up">
+                <svg id="encryption-svg" viewBox="0 0 800 300" width="100%" height="300px"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="lockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#3B82F6" />
+                            <stop offset="100%" stop-color="#8B5CF6" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Phone Node -->
+                    <rect x="50" y="100" width="80" height="120" rx="12" fill="var(--surface-color)" stroke="#10B981"
+                        stroke-width="2" />
+                    <rect x="60" y="110" width="60" height="100" rx="6" fill="var(--bg-color)" />
+                    <circle cx="90" cy="160" r="15" fill="#10B981" opacity="0.2" />
+                    <circle cx="90" cy="160" r="6" fill="#10B981" />
+                    <text x="90" y="250" class="svg-label" text-anchor="middle">Android Phone</text>
+
+                    <!-- Lock Node -->
+                    <g class="lock-group" transform="translate(400, 160)">
+                        <circle cx="0" cy="0" r="45" fill="url(#lockGrad)" class="lock-pulse" opacity="0.8" />
+                        <!-- Lock body -->
+                        <rect x="-16" y="-6" width="32" height="24" rx="4" fill="#fff" />
+                        <path d="M -10 -6 v -6 a 10 10 0 0 1 20 0 v 6" fill="none" stroke="#fff" stroke-width="4" />
+                        <!-- Keyhole -->
+                        <circle cx="0" cy="4" r="3" fill="#0f172a" />
+                        <path d="M -2 4 L -3 12 L 3 12 L 2 4 Z" fill="#0f172a" />
+                    </g>
+                    <text x="400" y="240" class="svg-label" text-anchor="middle">AES-256 Encryption</text>
+                    <text id="diagram-pin" x="400" y="260" fill="#10B981" font-size="14" font-weight="bold"
+                        font-family="Fira Code, monospace" text-anchor="middle">Your PIN: ----</text>
+
+                    <!-- PC Node -->
+                    <rect x="670" y="110" width="100" height="80" rx="8" fill="var(--surface-color)" stroke="#3B82F6"
+                        stroke-width="2" />
+                    <rect x="680" y="120" width="80" height="60" rx="4" fill="var(--bg-color)" />
+                    <path d="M 690 190 L 750 190 L 760 205 L 680 205 Z" fill="#3B82F6" opacity="0.8" />
+                    <text x="720" y="250" class="svg-label" text-anchor="middle">Windows PC</text>
+
+                    <!-- Paths and Data Packets -->
+                    <path id="path1" d="M 140 160 L 340 160" stroke="var(--text-secondary)" stroke-width="2"
+                        stroke-dasharray="4 4" fill="none" opacity="0.5" />
+                    <path id="path2" d="M 460 160 L 660 160" stroke="var(--text-secondary)" stroke-width="2"
+                        stroke-dasharray="4 4" fill="none" opacity="0.5" />
+
+                    <text x="240" y="145" class="svg-label" text-anchor="middle">Raw Audio</text>
+                    <text x="560" y="145" class="svg-label" text-anchor="middle">Encrypted Packets</text>
+
+                    <!-- Animated Packets -->
+                    <g id="packet-container"></g>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Setup in 3 Simple Steps -->
+    <section id="setup" class="section-bg-alt">
+        <div class="container">
+            <h2 class="section-title animate-up">Setup in Minutes</h2>
+            <p class="section-subtitle animate-up">No complicated configurations required.</p>
+
+            <div class="step-cards">
+                <!-- Connecting Line (Desktop) -->
+                <div class="step-connector"></div>
+
+                <!-- Step 1 -->
+                <div class="step-card animate-up stagger-1">
+                    <div class="step-mockup">
+                        <div class="mini-app-icon"><i data-lucide="download"></i></div>
+                        <div class="mini-dl-bar">
+                            <div class="mini-dl-fill"></div>
+                        </div>
+                    </div>
+                    <h3>1. Install</h3>
+                    <p>Download the lightweight Windows client and the Android app.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="step-card animate-up stagger-2">
+                    <div class="step-mockup">
+                        <div class="mini-phone">
+                            <div class="m-ip">192.168.x.x</div>
+                            <div class="m-pin" id="step-pin">----</div>
+                        </div>
+                    </div>
+                    <h3>2. Pair via PIN</h3>
+                    <p>Enter the 4-digit PIN generated by the Windows client into your phone.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="step-card animate-up stagger-3">
+                    <div class="step-mockup">
+                        <div class="mini-mic-pulse">
+                            <i data-lucide="mic"></i>
+                            <div class="ring r1"></div>
+                            <div class="ring r2"></div>
+                        </div>
+                    </div>
+                    <h3>3. Stream</h3>
+                    <p>Tap Start. Your phone is now a high-quality wireless microphone.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interface Preview Section -->
+    <section id="gallery">
+        <div class="container">
+            <h2 class="section-title animate-up">Interface Preview</h2>
+            <p class="section-subtitle animate-up">Clean, ad-free, and straightforward.</p>
+
+            <div class="preview-grid">
+                <!-- Left Column: Android App -->
+                <div class="preview-column animate-up stagger-1">
+                    <div class="preview-header" style="margin-bottom:1rem;">Android App</div>
+                    <div class="css-mockup-phone preview-mockup" style="max-width:300px;">
+                        <div class="phone-notch"></div>
+                        <div class="phone-body" style="padding:0; overflow:hidden;">
+                            <img src="assets/screenshots/android-app.jpg" alt="Android App Preview"
+                                style="width:100%; height:100%; object-fit:cover; object-position:top;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Windows Client -->
+                <div class="preview-column animate-up stagger-2">
+                    <div class="preview-header" style="margin-bottom:1rem;">Windows Client</div>
+                    <div class="css-mockup-pc preview-mockup"
+                        style="width:100%; height:auto; aspect-ratio:16/10; transform:none;">
+                        <div class="pc-header">
+                            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                            <span class="win-title">Wireless Mic Server</span>
+                        </div>
+                        <div class="pc-body" style="padding:0; overflow:hidden;">
+                            <img src="assets/screenshots/windows-client.png" alt="Windows Client Preview"
+                                style="width:100%; height:100%; object-fit:cover; object-position:top;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Under The Hood (Interactive Tabs) -->
+    <section id="specs" class="section-bg-alt">
+        <div class="container">
+            <h2 class="section-title animate-up">Under the Hood</h2>
+            <p class="section-subtitle animate-up">Technical specifications for power users.</p>
+
+            <div class="tabs-container animate-up">
+                <div class="tabs-header">
+                    <button class="tab-btn active" data-tab="encryption"><i data-lucide="lock"></i> Encryption</button>
+                    <button class="tab-btn" data-tab="audio"><i data-lucide="headphones"></i> Audio</button>
+                    <button class="tab-btn" data-tab="network"><i data-lucide="wifi"></i> Network</button>
+                    <button class="tab-btn" data-tab="system"><i data-lucide="cpu"></i> System</button>
+                </div>
+
+                <div class="tabs-content">
+                    <!-- Encryption Tab -->
+                    <div class="tab-pane active" id="tab-encryption">
+                        <div class="pane-visual">
+                            <div class="spec-lock-icon">
+                                <i data-lucide="shield-check"></i>
+                            </div>
+                            <div class="meter-value"><span class="counter" data-target="256">0</span>-bit</div>
+                            <div class="text-secondary">AES-CBC Security</div>
+                        </div>
+                        <div class="pane-details">
+                            <h3>Military-Grade Security</h3>
+                            <ul class="spec-list">
+                                <li><strong>Algorithm:</strong> AES-256 CBC</li>
+                                <li><strong>Key Derivation:</strong> SHA-256 hash of your 4-digit PIN</li>
+                                <li><strong>Initialization Vector:</strong> 16-byte random IV per packet</li>
+                                <li><strong>Padding:</strong> PKCS7 standard padding</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Audio Tab -->
+                    <div class="tab-pane" id="tab-audio">
+                        <div class="pane-visual">
+                            <canvas id="audio-waveform-canvas" width="250" height="100"></canvas>
+                        </div>
+                        <div class="pane-details">
+                            <h3>Lossless Capture</h3>
+                            <ul class="spec-list">
+                                <li><strong>Sample Rate:</strong> <span class="counter" data-target="48000">0</span> Hz
+                                </li>
+                                <li><strong>Bit Depth:</strong> <span class="counter" data-target="16">0</span>-bit</li>
+                                <li><strong>Channels:</strong> Mono (Microphone Standard)</li>
+                                <li><strong>Codec:</strong> Raw PCM (uncompressed, no artifacts)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Network Tab -->
+                    <div class="tab-pane" id="tab-network">
+                        <div class="pane-visual">
+                            <svg viewBox="0 0 200 100" width="200" height="100" class="latency-graph">
+                                <path d="M0,50 L200,50" stroke="var(--border-color)" stroke-width="1"
+                                    stroke-dasharray="2 2" />
+                                <path d="M0,70 L40,60 L80,65 L120,40 L160,55 L200,45" fill="none"
+                                    stroke="var(--accent-color)" stroke-width="3" />
+                            </svg>
+                            <p>Latency: <span class="text-accent">~20ms</span></p>
+                        </div>
+                        <div class="pane-details">
+                            <h3>Real-Time Streaming</h3>
+                            <ul class="spec-list">
+                                <li><strong>Protocol:</strong> UDP (User Datagram Protocol)</li>
+                                <li><strong>Port:</strong> 55555 (default, configurable)</li>
+                                <li><strong>Packet Size:</strong> Optimized for MTU limits</li>
+                                <li><strong>Error Handling:</strong> Automatic drop of out-of-order packets</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- System Tab -->
+                    <div class="tab-pane" id="tab-system">
+                        <div class="pane-visual sys-visual">
+                            <i data-lucide="smartphone" class="sys-icon text-accent"></i>
+                            <i data-lucide="arrow-right" class="sys-icon text-secondary"></i>
+                            <i data-lucide="monitor" class="sys-icon text-primary"></i>
+                        </div>
+                        <div class="pane-details">
+                            <h3>Broad Compatibility</h3>
+                            <ul class="spec-list">
+                                <li><strong>Windows:</strong> 10 / 11 (64-bit)</li>
+                                <li><strong>Android:</strong> 10.0 or higher</li>
+                                <li><strong>Network:</strong> Same local Wi-Fi or USB tethering</li>
+                                <li><strong>Audio Driver:</strong> VB-Audio Virtual Cable (included)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GitHub Stats -->
+    <section id="github">
+        <div class="container">
+            <div class="github-card animate-up">
+                <i data-lucide="github" class="github-logo"></i>
+                <h2>Fully Open Source</h2>
+                <p class="github-desc">Built with Python and Flutter. No trackers, no ads, no telemetry.</p>
+
+                <div class="stats-container" id="github-stats-container">
+                    <!-- Skeletons shown initially -->
+                    <div class="stat-item skeleton">
+                        <div class="skel-val"></div>
+                        <div class="skel-label"></div>
+                    </div>
+                    <div class="stat-item skeleton">
+                        <div class="skel-val"></div>
+                        <div class="skel-label"></div>
+                    </div>
+                </div>
+
+                <div class="github-actions">
+                    <a href="https://github.com/yourusername/wireless-mic" target="_blank" class="btn btn-primary">
+                        <i data-lucide="code"></i> View Source Code
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Professional Multi-Column Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-top">
+                <!-- Column 1 -->
+                <div class="footer-col brand-col">
+                    <a href="#" class="logo">
+                        <i data-lucide="mic" class="text-primary"></i>
+                        Wireless Mic
+                    </a>
+                    <p class="footer-tagline">Turn your Android device into a high-quality, secure wireless microphone
+                        for your PC.</p>
+                    <div class="footer-links">
+                        <a href="#features">Features</a>
+                        <a href="#security">Security</a>
+                        <a href="#download">Download</a>
+                        <a href="#specs">Documentation</a>
+                    </div>
+                </div>
+
+                <!-- Column 2 -->
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <div class="footer-links">
+                        <a href="https://github.com/yourusername/wireless-mic">GitHub Repo</a>
+                        <a href="https://github.com/yourusername/wireless-mic/issues">Issues</a>
+                        <a href="https://github.com/yourusername/wireless-mic/discussions">Discussions</a>
+                        <a href="#">Wiki</a>
+                    </div>
+                </div>
+
+                <!-- Column 3 -->
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <div class="footer-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">License (MIT)</a>
+                    </div>
+                </div>
+
+                <!-- Column 4 -->
+                <div class="footer-col">
+                    <h4>Connect</h4>
+                    <div class="social-icons">
+                        <a href="https://github.com/yourusername/wireless-mic" aria-label="GitHub"><i
+                                data-lucide="github"></i></a>
+                        <a href="#" aria-label="Twitter"><i data-lucide="twitter"></i></a>
+                        <a href="#" aria-label="Discord"><i data-lucide="message-square"></i></a>
+                    </div>
+                    <a href="mailto:contact@example.com" class="email-link">contact@example.com</a>
+                </div>
+            </div>
+
+            <div class="footer-middle">
+                <div class="trust-badges">
+                    <span class="trust-badge"><i data-lucide="lock" class="text-accent"></i> AES-256 Encrypted</span>
+                    <span class="trust-badge"><i data-lucide="shield-check" class="text-accent"></i> Privacy-First
+                        Design</span>
+                    <span class="trust-badge"><i data-lucide="check-circle" class="text-accent"></i> Open Source</span>
+                    <span class="trust-badge"><i data-lucide="wifi" class="text-accent"></i> Local Network Only</span>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="copyright-info">
+                    <p>&copy; 2024 Wireless Mic. MIT License.</p>
+                    <p>Built with ❤️ using Flutter & Python</p>
+                </div>
+                <div class="bottom-actions">
+                    <span class="version-info">v1.2.0 - January 2025</span>
+                    <button class="theme-toggle bottom-theme-toggle" id="bottomThemeToggle" aria-label="Toggle theme">
+                        <i data-lucide="sun" class="light-icon"></i>
+                        <i data-lucide="moon" class="dark-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>
