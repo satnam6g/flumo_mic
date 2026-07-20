@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 void main() {
   runApp(const WirelessMicApp());
@@ -69,12 +70,14 @@ class _MicPageState extends State<MicPage> with WidgetsBindingObserver {
   final TextEditingController _ipController = TextEditingController();
   final TextEditingController _pinController = TextEditingController();
   bool _isStreaming = false;
+  bool _isStarting = false; // Debounce guard
   String _status = 'Idle';
   int _packetsSent = 0;
   int _bytesSent = 0;
   StreamSubscription? _audioSubscription;
   RawDatagramSocket? _udpSocket;
   SharedPreferences? _prefs;
+  Timer? _heartbeatTimer;
 
   // ── Constants ───────────────────────────────────────────────────────────
   static const int _udpPort = 55555;
@@ -130,6 +133,8 @@ class _MicPageState extends State<MicPage> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _stopStreaming();
     _ipController.dispose();
+    _pinController.dispose();
+    _heartbeatTimer?.cancel();
     super.dispose();
   }
 
@@ -157,14 +162,26 @@ class _MicPageState extends State<MicPage> with WidgetsBindingObserver {
 
   // ── Start Streaming ────────────────────────────────────────────────────
   Future<void> _startStreaming() async {
+    // Debounce guard — prevent double-tap
+    if (_isStarting || _isStreaming) return;
+    setState(() => _isStarting = true);
+
+    try {
+      await _doStartStreaming();
+    } finally {
+      if (mounted) setState(() => _isStarting = false);
+    }
+  }
+
+  Future<void> _doStartStreaming() async {
     final ip = _ipController.text.trim();
     final pin = _pinController.text.trim();
     if (ip.isEmpty) {
       _setStatus('Enter the Windows PC IP address.');
       return;
     }
-    if (pin.isEmpty || pin.length != 4) {
-      _setStatus('Enter the 4-digit Security PIN.');
+    if (pin.length != 4) {
+      _setStatus('Enter exactly 4 digits for the Security PIN.');
       return;
     }
 
@@ -193,6 +210,10 @@ class _MicPageState extends State<MicPage> with WidgetsBindingObserver {
               if (msg == 'ERROR:WRONG_PIN') {
                 _setStatus('Error: Incorrect PIN entered!');
                 _stopStreaming();
+              } else if (msg == 'CMD:STOP') {
+                // Windows server requested disconnect
+                _setStatus('Windows server disconnected.');
+                _stopStreaming();
               }
             } catch (_) {}
           }
@@ -220,6 +241,9 @@ class _MicPageState extends State<MicPage> with WidgetsBindingObserver {
         callback: startCallback,
       );
     }
+
+    // Keep screen awake while streaming
+    WakelockPlus.enable();
 
     _audioSubscription = _audioStream.receiveBroadcastStream().listen(
       (dynamic data) {
@@ -258,6 +282,16 @@ class _MicPageState extends State<MicPage> with WidgetsBindingObserver {
       },
     );
 
+    // Start heartbeat — send periodic ping to Windows so it knows we're alive
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+      if (_udpSocket != null && _isStreaming) {
+        try {
+          _udpSocket!.send(utf8.encode('HEARTBEAT'), targetAddress, _udpPort);
+        } catch (_) {}
+      }
+    });
+
     setState(() {
       _isStreaming = true;
     });
@@ -265,6 +299,9 @@ class _MicPageState extends State<MicPage> with WidgetsBindingObserver {
 
   // ── Stop Streaming ─────────────────────────────────────────────────────
   Future<void> _stopStreaming() async {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+
     await _audioSubscription?.cancel();
     _audioSubscription = null;
 
@@ -274,6 +311,9 @@ class _MicPageState extends State<MicPage> with WidgetsBindingObserver {
 
     _udpSocket?.close();
     _udpSocket = null;
+
+    // Release wake lock
+    WakelockPlus.disable();
 
     if (await FlutterForegroundTask.isRunningService) {
       await FlutterForegroundTask.stopService();
@@ -341,13 +381,20 @@ class _MicPageState extends State<MicPage> with WidgetsBindingObserver {
                 enabled: !_isStreaming,
                 keyboardType: TextInputType.number,
                 maxLength: 4,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                obscureText: true,
-                style: const TextStyle(color: Colors.white, fontSize: 18),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(4),
+                ],
+                obscureText: false,
+                style: const TextStyle(color: Colors.white, fontSize: 18, letterSpacing: 8),
+                textAlign: TextAlign.center,
                 decoration: InputDecoration(
                   labelText: 'Security PIN (From PC)',
                   labelStyle: const TextStyle(color: Colors.white70),
                   prefixIcon: const Icon(Icons.lock, color: Colors.white70),
+                  hintText: '0000',
+                  hintStyle: TextStyle(color: Colors.white24, letterSpacing: 8),
+                  counterText: '',
                   enabledBorder: OutlineInputBorder(
                     borderSide: const BorderSide(color: Colors.white30),
                     borderRadius: BorderRadius.circular(8),
@@ -379,7 +426,7 @@ class _MicPageState extends State<MicPage> with WidgetsBindingObserver {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                         elevation: 0,
                       ),
-                      onPressed: _isStreaming ? null : _startStreaming,
+                      onPressed: (_isStreaming || _isStarting) ? null : _startStreaming,
                     ),
                   ),
                   const SizedBox(width: 16),

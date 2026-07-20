@@ -29,6 +29,8 @@ hidden_imports = [
 datas = [
     (os.path.join("assets", "icon.ico"),  "assets"),
     (os.path.join("assets", "icon.png"),  "assets"),
+    (os.path.join("vb_cable", "VBCABLE_Setup_x64.exe"), "vb_cable"),
+    (os.path.join("vb_cable", "VBCABLE_Setup.exe"), "vb_cable"),
 ]
 
 a = Analysis(

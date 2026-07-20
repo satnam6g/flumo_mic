@@ -1,4 +1,4 @@
-﻿# Flutter & Dart
+# Flutter & Dart
 .dart_tool/
 .packages
 *.iml
@@ -36,3 +36,5 @@ Thumbs.db
 *.zip
 *.tar.gz
 .env
+website/
+

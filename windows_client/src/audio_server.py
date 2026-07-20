@@ -79,7 +79,7 @@ class AudioServer:
         on_level:      Callable[[float], None]  = None,
         on_log:        Callable[[str], None]    = None,
         on_stats:      Callable[[dict], None]   = None,
-        use_vbcable:   bool                     = True,
+        on_vbcable_missing: Callable[[], None]  = None,
     ):
         self._pin           = pin
         self._on_connect    = on_connect    or (lambda a: None)
@@ -87,12 +87,14 @@ class AudioServer:
         self._on_level      = on_level      or (lambda l: None)
         self._on_log        = on_log        or logger.info
         self._on_stats      = on_stats      or (lambda s: None)
-        self._use_vbcable   = use_vbcable
+        self._on_vbcable_missing = on_vbcable_missing or (lambda: None)
 
         self._running       = threading.Event()
         self._audio_queue   = queue.Queue(maxsize=MAX_QUEUE_DEPTH)
         self._connected     = False
-        self._last_addr     = ""
+        self._last_addr     = ""           # "ip:port" string
+        self._last_addr_tuple = None       # (ip, port) tuple for sending STOP
+        self._sock          = None         # Reference to UDP socket for sending STOP
 
         self._stats_lock    = threading.Lock()
         self._stats         = {
@@ -135,6 +137,8 @@ class AudioServer:
     def stop(self):
         if not self._running.is_set():
             return
+        # Send STOP command to connected Android device
+        self._send_stop_to_phone()
         self._running.clear()
         self._log("Server stopped.")
         if self._connected:
@@ -154,13 +158,14 @@ class AudioServer:
         s["uptime"] = time.time() - s["start_time"] if s["start_time"] else 0
         return s
 
-    @property
-    def use_vbcable(self) -> bool:
-        return self._use_vbcable
-
-    @use_vbcable.setter
-    def use_vbcable(self, value: bool):
-        self._use_vbcable = value
+    def _send_stop_to_phone(self):
+        """Send CMD:STOP to the last connected Android device."""
+        if self._last_addr_tuple and self._sock:
+            try:
+                self._sock.sendto(b"CMD:STOP", self._last_addr_tuple)
+                self._log(f"[SYNC] Sent stop command to {self._last_addr_tuple[0]}")
+            except Exception:
+                pass
 
     # ── Internal Threads ───────────────────────────────────────────────────────
 
@@ -180,6 +185,7 @@ class AudioServer:
             self._running.clear()
             return
 
+        self._sock = sock  # Store reference for sending STOP
         self._log(f"[UDP] Listening on 0.0.0.0:{UDP_PORT}")
 
         while self._running.is_set():
@@ -193,7 +199,19 @@ class AudioServer:
                 break
 
             now = time.time()
-            
+
+            # Skip heartbeat packets (plain text control messages)
+            try:
+                text = data.decode('utf-8', errors='strict')
+                if text == 'HEARTBEAT':
+                    # Update last packet time to keep connection alive
+                    with self._stats_lock:
+                        self._stats["last_packet_time"] = now
+                    self._last_addr_tuple = addr
+                    continue
+            except (UnicodeDecodeError, ValueError):
+                pass
+
             if self._pin and len(data) > 16:
                 try:
                     iv = data[:16]
@@ -219,6 +237,7 @@ class AudioServer:
                 self._stats["last_packet_time"] = now
 
             addr_str = f"{addr[0]}:{addr[1]}"
+            self._last_addr_tuple = addr  # Track for sending STOP
             if not self._connected or addr_str != self._last_addr:
                 self._connected = True
                 self._last_addr = addr_str
@@ -247,6 +266,7 @@ class AudioServer:
                 with self._stats_lock:
                     self._stats["packets_dropped"] += 1
 
+        self._sock = None
         sock.close()
         self._log("[UDP] Listener stopped.")
 
@@ -259,23 +279,21 @@ class AudioServer:
             return
 
         pa = pyaudio.PyAudio()
-        device_index = None
 
-        if self._use_vbcable:
-            device_index = _find_vbcable_index(pa)
-            if device_index is not None:
-                info = pa.get_device_info_by_index(device_index)
-                self._log(f"[AUDIO] Using VB-Cable: {info['name']}")
-            else:
-                self._log("[AUDIO] VB-Cable not found — using default output.")
-
-        try:
-            default_info = pa.get_default_output_device_info()
-            self._log(f"[AUDIO] Output: {default_info['name']} @ {SAMPLE_RATE} Hz")
-        except IOError:
-            self._log("[ERROR] No audio output device found.")
+        # VB-Cable is REQUIRED — never fall back to speakers
+        device_index = _find_vbcable_index(pa)
+        if device_index is not None:
+            info = pa.get_device_info_by_index(device_index)
+            self._log(f"[AUDIO] Using VB-Cable: {info['name']}")
+        else:
+            self._log("[ERROR] VB-Cable not found! Audio will NOT play through speakers.")
+            self._log("[ERROR] Install VB-Audio Virtual Cable from https://vb-audio.com/Cable/")
             self._running.clear()
             pa.terminate()
+            try:
+                self._on_vbcable_missing()
+            except Exception:
+                pass
             return
 
         try:
@@ -329,6 +347,8 @@ class AudioServer:
             if last > 0 and (time.time() - last) > CONN_TIMEOUT:
                 self._connected = False
                 self._log("[WATCHDOG] Connection timed out.")
+                # Send STOP to phone so it knows we lost connection
+                self._send_stop_to_phone()
                 try:
                     self._on_disconnect()
                 except Exception:

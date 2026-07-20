@@ -12,6 +12,7 @@ import sys
 import os
 import logging
 import webbrowser
+import subprocess
 from datetime import datetime
 import random
 
@@ -85,7 +86,6 @@ class App(tk.Tk):
         self._peak_hold    = 0
         self._always_on_top= tk.BooleanVar(value=False)
         self._minimize_tray= tk.BooleanVar(value=True)
-        self._use_vbcable  = tk.BooleanVar(value=True)
         self._server_running = False
         self._pin_var      = tk.StringVar(value=f"{random.randint(1000, 9999):04d}")
 
@@ -103,8 +103,8 @@ class App(tk.Tk):
         self._start_ip_monitor()
         self._update_loop()
 
-        # Start server automatically
-        self.after(500, self._start_server)
+        # Check VB-Cable on startup and auto-install if needed
+        self.after(200, self._ensure_vbcable)
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         logger.info("Wireless Mic Client v%s started", VERSION)
@@ -396,12 +396,6 @@ class App(tk.Tk):
             variable=self._minimize_tray,
         ).pack(side="left", padx=(16, 0))
 
-        ttk.Checkbutton(
-            parent, text="Route to VB-Cable",
-            variable=self._use_vbcable,
-            command=self._toggle_vbcable,
-        ).pack(side="left", padx=(16, 0))
-
     # ── Server Control ─────────────────────────────────────────────────────────
 
     def _start_server(self):
@@ -413,7 +407,7 @@ class App(tk.Tk):
             on_level=self._on_level,
             on_log=self._append_log,
             on_stats=self._on_stats,
-            use_vbcable=self._use_vbcable.get(),
+            on_vbcable_missing=self._on_vbcable_missing,
         )
         self._server.start()
         self._server_running = True
@@ -436,9 +430,119 @@ class App(tk.Tk):
         else:
             self._start_server()
 
-    def _toggle_vbcable(self):
-        if self._server:
-            self._server.use_vbcable = self._use_vbcable.get()
+    # ── VB-Cable Auto-Install ───────────────────────────────────────────────
+
+    def _find_vbcable_installer(self):
+        """Find the bundled VB-Cable installer."""
+        import platform
+        exe_name = "VBCABLE_Setup_x64.exe" if platform.machine().endswith('64') else "VBCABLE_Setup.exe"
+        candidates = [
+            os.path.join(_HERE, "..", "vb_cable", exe_name),
+            os.path.join(_HERE, "vb_cable", exe_name),
+            os.path.join(os.path.dirname(sys.executable), "vb_cable", exe_name),
+            # PyInstaller bundled path
+            os.path.join(getattr(sys, '_MEIPASS', ''), "vb_cable", exe_name),
+        ]
+        for p in candidates:
+            if os.path.exists(p):
+                return os.path.abspath(p)
+        return None
+
+    def _is_vbcable_installed(self):
+        """Check if VB-Cable is installed by looking for the audio device."""
+        try:
+            import pyaudio
+            pa = pyaudio.PyAudio()
+            for i in range(pa.get_device_count()):
+                info = pa.get_device_info_by_index(i)
+                name = info.get("name", "").lower()
+                if "cable input" in name or "vb-audio" in name or "vbcable" in name:
+                    if info.get("maxOutputChannels", 0) > 0:
+                        pa.terminate()
+                        return True
+            pa.terminate()
+        except Exception:
+            pass
+        return False
+
+    def _ensure_vbcable(self):
+        """Check for VB-Cable and install if missing, then start server."""
+        if self._is_vbcable_installed():
+            self._append_log("✓ VB-Cable detected.")
+            self.after(300, self._start_server)
+            return
+
+        # VB-Cable not found — try to auto-install
+        installer = self._find_vbcable_installer()
+        if installer:
+            self._append_log("VB-Cable not found. Installing automatically...")
+            self._install_vbcable(installer)
+        else:
+            self._append_log("[ERROR] VB-Cable not found and installer not bundled.")
+            messagebox.showerror(
+                "VB-Cable Required",
+                "VB-Audio Virtual Cable is required but not installed.\n\n"
+                "Download it from:\nhttps://vb-audio.com/Cable/\n\n"
+                "Install VB-Cable, then restart Wireless Mic."
+            )
+            webbrowser.open("https://vb-audio.com/Cable/")
+
+    def _install_vbcable(self, installer_path):
+        """Run the VB-Cable installer with admin elevation."""
+        def _do_install():
+            try:
+                # Use ShellExecute with 'runas' to trigger UAC elevation
+                import ctypes
+                ret = ctypes.windll.shell32.ShellExecuteW(
+                    None, "runas", installer_path, "-i -h", None, 0  # SW_HIDE
+                )
+                if ret > 32:
+                    # Wait for install to complete
+                    time.sleep(5)
+                    self.after(0, self._post_vbcable_install)
+                else:
+                    self.after(0, lambda: self._append_log(
+                        "[ERROR] VB-Cable install failed or was cancelled."
+                    ))
+            except Exception as e:
+                self.after(0, lambda: self._append_log(f"[ERROR] VB-Cable install error: {e}"))
+
+        threading.Thread(target=_do_install, daemon=True).start()
+
+    def _post_vbcable_install(self):
+        """Called after VB-Cable install attempt."""
+        if self._is_vbcable_installed():
+            self._append_log("✓ VB-Cable installed successfully!")
+            self.after(500, self._start_server)
+        else:
+            self._append_log("[WARN] VB-Cable may need a restart to appear. Trying to start server anyway...")
+            self.after(500, self._start_server)
+
+    def _on_vbcable_missing(self):
+        """Called by AudioServer when VB-Cable is not found at playback time."""
+        def _update():
+            self._stop_server()
+            self._status_var.set("VB-Cable Missing")
+            self._status_led.itemconfig(self._led_circle, fill=CLR["amber"])
+            self._append_log("[ERROR] VB-Cable not found. Audio cannot be routed.")
+
+            installer = self._find_vbcable_installer()
+            if installer:
+                if messagebox.askyesno(
+                    "VB-Cable Required",
+                    "VB-Audio Virtual Cable is required but not installed.\n\n"
+                    "Would you like to install it now?"
+                ):
+                    self._install_vbcable(installer)
+            else:
+                messagebox.showerror(
+                    "VB-Cable Required",
+                    "VB-Audio Virtual Cable is not installed.\n\n"
+                    "Download from: https://vb-audio.com/Cable/\n"
+                    "Install it, then restart Wireless Mic."
+                )
+                webbrowser.open("https://vb-audio.com/Cable/")
+        self.after(0, _update)
 
     # ── Callbacks (thread-safe via after()) ────────────────────────────────────
 

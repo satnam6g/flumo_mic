@@ -1,10 +1,13 @@
 package com.wirelessmic.audio
 
+import android.content.Context
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.net.wifi.WifiManager
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
@@ -17,6 +20,9 @@ class AudioRecordPlugin : FlutterPlugin {
     private var audioThread: Thread? = null
     private val isRecording = AtomicBoolean(false)
     private var audioRecord: AudioRecord? = null
+    private var wakeLock: PowerManager.WakeLock? = null
+    private var wifiLock: WifiManager.WifiLock? = null
+    private var appContext: Context? = null
 
     companion object {
         private const val EVENT_CHANNEL = "com.wirelessmic/audio_stream"
@@ -27,6 +33,7 @@ class AudioRecordPlugin : FlutterPlugin {
     }
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        appContext = binding.applicationContext
         eventChannel = EventChannel(binding.binaryMessenger, EVENT_CHANNEL)
         methodChannel = MethodChannel(binding.binaryMessenger, METHOD_CHANNEL)
 
@@ -60,6 +67,49 @@ class AudioRecordPlugin : FlutterPlugin {
         stopRecording()
         eventChannel.setStreamHandler(null)
         methodChannel.setMethodCallHandler(null)
+        appContext = null
+    }
+
+    private fun acquireLocks() {
+        val ctx = appContext ?: return
+
+        // CPU wake lock — keeps CPU active when screen is off
+        try {
+            val powerManager = ctx.getSystemService(Context.POWER_SERVICE) as PowerManager
+            wakeLock = powerManager.newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK,
+                "WirelessMic::AudioCaptureLock"
+            ).apply {
+                acquire(60 * 60 * 1000L) // 1 hour max
+            }
+        } catch (e: Exception) {
+            // Ignore — wake lock is best-effort
+        }
+
+        // Wi-Fi lock — keeps Wi-Fi active when screen is off
+        try {
+            val wifiManager = ctx.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            wifiLock = wifiManager.createWifiLock(
+                WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                "WirelessMic::WifiStreamLock"
+            ).apply {
+                acquire()
+            }
+        } catch (e: Exception) {
+            // Ignore — wifi lock is best-effort
+        }
+    }
+
+    private fun releaseLocks() {
+        try {
+            if (wakeLock?.isHeld == true) wakeLock?.release()
+        } catch (_: Exception) {}
+        wakeLock = null
+
+        try {
+            if (wifiLock?.isHeld == true) wifiLock?.release()
+        } catch (_: Exception) {}
+        wifiLock = null
     }
 
     private fun startRecording(events: EventChannel.EventSink) {
@@ -98,6 +148,9 @@ class AudioRecordPlugin : FlutterPlugin {
             audioRecord = null
             return
         }
+
+        // Acquire wake + wifi locks before starting recording
+        acquireLocks()
 
         isRecording.set(true)
         audioRecord?.startRecording()
@@ -155,5 +208,8 @@ class AudioRecordPlugin : FlutterPlugin {
         } catch (_: Exception) {}
 
         audioRecord = null
+
+        // Release locks when recording stops
+        releaseLocks()
     }
 }

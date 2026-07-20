@@ -1,7 +1,7 @@
 name: wireless_mic
 description: Wireless microphone app - streams audio over UDP to a Windows receiver.
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -17,6 +17,7 @@ dependencies:
   google_fonts: ^8.1.0
   encrypt: ^5.0.3
   crypto: ^3.0.3
+  wakelock_plus: ^1.2.8
 
 dev_dependencies:
   flutter_test:
@@ -29,5 +30,5 @@ flutter:
 
 flutter_launcher_icons:
   android: "launcher_icon"
-  ios: true
+  ios: false
   image_path: "../windows_client/assets/icon.png"

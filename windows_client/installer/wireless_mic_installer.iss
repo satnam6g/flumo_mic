@@ -76,17 +76,17 @@ Name: "startuprun";  Description: "Launch &automatically at startup";  GroupDesc
 
 ; ── Run ───────────────────────────────────────────────────────────────────────
 [Run]
-; Install VB-Cable silently (x64)
+; Install VB-Cable silently (x64) — needs admin for driver install
 Filename: "{tmp}\vb_cable\VBCABLE_Setup_x64.exe"; Parameters: "-i -h"; \
   StatusMsg: "Installing VB-Audio Virtual Cable…"; \
-  Flags: waituntilterminated runascurrentuser; \
-  Components: vbcable; Check: IsWin64
+  Flags: waituntilterminated runhidden shellexec; \
+  Components: vbcable; Check: IsWin64 and ShouldInstallVBCable
 
 ; Install VB-Cable silently (x86 fallback)
 Filename: "{tmp}\vb_cable\VBCABLE_Setup.exe"; Parameters: "-i -h"; \
   StatusMsg: "Installing VB-Audio Virtual Cable (32-bit)…"; \
-  Flags: waituntilterminated runascurrentuser; \
-  Components: vbcable; Check: not IsWin64
+  Flags: waituntilterminated runhidden shellexec; \
+  Components: vbcable; Check: (not IsWin64) and ShouldInstallVBCable
 
 ; Add Windows Firewall rule (runs elevated)
 Filename: "powershell.exe"; \
