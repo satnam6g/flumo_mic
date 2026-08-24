@@ -5,7 +5,7 @@
 ; ============================================================================
 
 #define AppName      "Wireless Mic Client"
-#define AppVersion   "1.0.0"
+#define AppVersion   "1.0.1"
 #define AppPublisher "WirelessMic"
 #define AppExeName   "WirelessMic.exe"
 #define AppId        "{{A7B3C2D1-E4F5-6789-ABCD-EF1234567890}"

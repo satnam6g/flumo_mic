@@ -18,6 +18,7 @@ dependencies:
   encrypt: ^5.0.3
   crypto: ^3.0.3
   wakelock_plus: ^1.2.8
+  mobile_scanner: 5.2.3
 
 dev_dependencies:
   flutter_test:

@@ -5,6 +5,12 @@
 
 ---
 
+## 📸 Client Interface
+
+![Wireless Mic Windows Client](../website/assets/screenshots/windows-client.png)
+
+---
+
 ## Project Structure
 
 ```

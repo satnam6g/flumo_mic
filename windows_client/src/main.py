@@ -1,7 +1,8 @@
 """
 main.py - Wireless Mic Client GUI Application
 Modern dark-themed Tkinter GUI for receiving audio from Android device.
-Version: 1.0.0
+Version: 2.0.1  (persistent PIN, QR pairing, DSP controls, recording,
+hotkeys, live stats, multi-sender, auto-start with Windows)
 """
 
 import tkinter as tk
@@ -10,6 +11,7 @@ import threading
 import time
 import sys
 import os
+import json
 import logging
 import webbrowser
 import subprocess
@@ -39,7 +41,34 @@ from ip_detector  import get_best_ip, IPChangeMonitor
 from system_tray  import TrayIcon
 
 # ── App Version ────────────────────────────────────────────────────────────────
-VERSION = "1.0.0"
+VERSION = "2.0.1"
+
+# ── Config persistence ─────────────────────────────────────────────────────────
+CONFIG_DIR  = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "WirelessMic")
+CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
+
+RECORDINGS_DIR = os.path.join(os.path.expanduser("~"), "Music", "WirelessMic")
+
+AUTOSTART_RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
+AUTOSTART_NAME    = "WirelessMicClient"
+
+
+def load_config() -> dict:
+    try:
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_config(cfg: dict):
+    try:
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, indent=2)
+    except Exception as e:
+        logger.warning("Could not save config: %s", e)
+
 
 # ── Colour Palette (Dark Theme) ────────────────────────────────────────────────
 CLR = {
@@ -71,10 +100,19 @@ class App(tk.Tk):
         super().__init__()
 
         self.title("Wireless Mic Client")
-        self.geometry("640x520")
-        self.minsize(580, 460)
+        self.geometry("680x640")
+        self.minsize(600, 580)
         self.configure(bg=CLR["bg"])
         self.resizable(True, True)
+
+        # ── Config ──
+        cfg = load_config()
+        self._cfg = cfg
+        pin = str(cfg.get("pin", "")).strip()
+        if not (len(pin) == 4 and pin.isdigit()):
+            pin = f"{random.randint(1000, 9999):04d}"
+            cfg["pin"] = pin
+            save_config(cfg)
 
         # State
         self._server:      AudioServer = None
@@ -84,10 +122,18 @@ class App(tk.Tk):
         self._level        = 0.0
         self._peak         = 0.0
         self._peak_hold    = 0
-        self._always_on_top= tk.BooleanVar(value=False)
-        self._minimize_tray= tk.BooleanVar(value=True)
+        self._always_on_top= tk.BooleanVar(value=cfg.get("always_on_top", False))
+        self._minimize_tray= tk.BooleanVar(value=cfg.get("minimize_tray", True))
+        self._autostart_win= tk.BooleanVar(value=cfg.get("autostart_windows", False))
+        self._mute_var     = tk.BooleanVar(value=False)
+        self._monitor_var  = tk.BooleanVar(value=cfg.get("monitor", False))
+        self._gain_var     = tk.DoubleVar(value=float(cfg.get("gain", 1.0)))
+        self._gate_var     = tk.DoubleVar(value=float(cfg.get("gate", 0.0)))
         self._server_running = False
-        self._pin_var      = tk.StringVar(value=f"{random.randint(1000, 9999):04d}")
+        self._pin_var      = tk.StringVar(value=pin)
+        self._recording    = False
+        self._rec_t0       = 0.0
+        self._hotkeys_ok   = False
 
         # Icon path
         self._icon_path = self._find_asset("icon.ico")
@@ -99,9 +145,12 @@ class App(tk.Tk):
 
         self._build_styles()
         self._build_ui()
+        self._register_hotkeys()
+        self._sync_autostart_win(silent=True)
         self._start_tray()
         self._start_ip_monitor()
         self._update_loop()
+        self._rec_timer_loop()
 
         # Check VB-Cable on startup and auto-install if needed
         self.after(200, self._ensure_vbcable)
@@ -135,6 +184,15 @@ class App(tk.Tk):
             background=[("active", "#F87171"), ("pressed", "#DC2626")],
         )
         style.configure(
+            "Record.TButton",
+            background=CLR["red"], foreground="white",
+            font=(FONT_FAMILY, 9, "bold"), relief="flat",
+            padding=(10, 6),
+        )
+        style.map("Record.TButton",
+            background=[("active", "#F87171")],
+        )
+        style.configure(
             "Ghost.TButton",
             background=CLR["surface2"], foreground=CLR["text_dim"],
             font=(FONT_FAMILY, 9), relief="flat", padding=(8, 5),
@@ -146,6 +204,9 @@ class App(tk.Tk):
             "TCheckbutton",
             background=CLR["bg"], foreground=CLR["text_dim"],
             font=(FONT_FAMILY, 9),
+        )
+        style.map("TCheckbutton",
+            background=[("active", CLR["bg"])],
         )
         style.configure(
             "TLabel",
@@ -177,12 +238,17 @@ class App(tk.Tk):
             font=(FONT_FAMILY, 9), pady=12, padx=4,
         ).pack(side="left")
 
+        ttk.Button(
+            hdr, text="🔳  Show QR", style="Ghost.TButton",
+            command=self._show_qr,
+        ).pack(side="right", padx=12, pady=6)
+
         # Separator
         tk.Frame(self, bg=CLR["border"], height=1).pack(fill="x")
 
         # ─ Body ───────────────────────────────────────────────────────────────
         body = tk.Frame(self, bg=CLR["bg"])
-        body.pack(fill="both", expand=True, padx=18, pady=14)
+        body.pack(fill="both", expand=True, padx=18, pady=12)
         body.columnconfigure(0, weight=1)
 
         # IP and PIN Cards
@@ -213,29 +279,33 @@ class App(tk.Tk):
         meter_card = self._card(body, row=2, pady_top=8)
         self._build_meter_card(meter_card)
 
+        # Audio DSP controls card
+        dsp_card = self._card(body, row=3, pady_top=8)
+        self._build_dsp_card(dsp_card)
+
         # Controls row
         ctrl = tk.Frame(body, bg=CLR["bg"])
-        ctrl.grid(row=3, column=0, sticky="ew", pady=(10, 0))
+        ctrl.grid(row=4, column=0, sticky="ew", pady=(10, 0))
         self._build_controls(ctrl)
 
         # Options row
         opts = tk.Frame(body, bg=CLR["bg"])
-        opts.grid(row=4, column=0, sticky="ew", pady=(6, 0))
+        opts.grid(row=5, column=0, sticky="ew", pady=(6, 0))
         self._build_options(opts)
 
         # Log area
         log_lbl = tk.Label(body, text="Event Log", bg=CLR["bg"], fg=CLR["text_muted"],
                            font=(FONT_FAMILY, 9, "bold"), anchor="w")
-        log_lbl.grid(row=5, column=0, sticky="ew", pady=(10, 3))
+        log_lbl.grid(row=6, column=0, sticky="ew", pady=(10, 3))
 
         self._log_box = scrolledtext.ScrolledText(
-            body, height=6, bg=CLR["surface"], fg=CLR["text_dim"],
+            body, height=5, bg=CLR["surface"], fg=CLR["text_dim"],
             font=("Consolas", 8), bd=0, relief="flat",
             insertbackground=CLR["text"],
             selectbackground=CLR["accent"], wrap="word",
         )
-        self._log_box.grid(row=6, column=0, sticky="nsew")
-        body.rowconfigure(6, weight=1)
+        self._log_box.grid(row=7, column=0, sticky="nsew")
+        body.rowconfigure(7, weight=1)
 
         # ─ Footer ─────────────────────────────────────────────────────────────
         tk.Frame(self, bg=CLR["border"], height=1).pack(fill="x")
@@ -252,6 +322,11 @@ class App(tk.Tk):
             fg=CLR["text_muted"], font=(FONT_FAMILY, 8), pady=5,
         )
         self._stats_label.pack(side="right", padx=12)
+
+        # In-app hotkeys
+        self.bind("<Control-Alt-m>", lambda e: self.after(0, self._toggle_mute))
+        self.bind("<Control-Alt-r>", lambda e: self.after(0, self._toggle_record))
+        self.bind("<Control-Alt-s>", lambda e: self.after(0, self._toggle_monitor))
 
     def _card(self, parent, row=None, col=0, padright=0, padleft=0, pady_top=0):
         """Create a rounded surface card frame."""
@@ -309,10 +384,16 @@ class App(tk.Tk):
             justify="center"
         )
         pin_entry.grid(row=1, column=0, sticky="w", padx=14, pady=4)
-        
-        tk.Label(parent, text="4-digit code",
+
+        btn_row = tk.Frame(parent, bg=CLR["surface"])
+        btn_row.grid(row=1, column=1, sticky="e", padx=(0, 10))
+        ttk.Button(btn_row, text="↻ New", style="Ghost.TButton", width=5,
+                   command=self._new_pin).pack(side="left")
+
+        tk.Label(parent, text="Saved — same PIN on every launch",
                  bg=CLR["surface"], fg=CLR["text_muted"],
-                 font=(FONT_FAMILY, 8)).grid(row=2, column=0, sticky="w", padx=14, pady=(0, 10))
+                 font=(FONT_FAMILY, 8)).grid(row=2, column=0, columnspan=2,
+                                             sticky="w", padx=14, pady=(0, 10))
 
     def _build_status_card(self, parent):
         parent.columnconfigure(0, weight=1)
@@ -367,6 +448,67 @@ class App(tk.Tk):
 
         self._meter_canvas.bind("<Configure>", lambda e: self._draw_meter())
 
+    def _build_dsp_card(self, parent):
+        """Audio controls: gain, noise gate, mute, monitor, record."""
+        tk.Label(parent, text="Audio Controls",
+                 bg=CLR["surface"], fg=CLR["text_muted"],
+                 font=(FONT_FAMILY, 9)).grid(row=0, column=0, columnspan=6,
+                                             sticky="w", padx=14, pady=(10, 2))
+
+        parent.columnconfigure(1, weight=1)
+        parent.columnconfigure(3, weight=1)
+
+        # Gain slider
+        tk.Label(parent, text="Gain", bg=CLR["surface"], fg=CLR["text_dim"],
+                 font=(FONT_FAMILY, 9)).grid(row=1, column=0, sticky="w", padx=14)
+        self._gain_scale = tk.Scale(
+            parent, from_=0.5, to=3.0, resolution=0.05, orient="horizontal",
+            bg=CLR["surface"], fg=CLR["text"], troughcolor=CLR["surface2"],
+            highlightthickness=0, bd=0, length=170, showvalue=False,
+            activebackground=CLR["accent"], sliderrelief="flat",
+            command=self._on_gain_change,
+        )
+        self._gain_scale.set(self._gain_var.get())
+        self._gain_scale.grid(row=1, column=1, sticky="w", padx=(4, 10))
+        self._gain_val_lbl = tk.Label(parent, text="", bg=CLR["surface"],
+                                      fg=CLR["text_dim"], font=(FONT_FAMILY, 8), width=5)
+        self._gain_val_lbl.grid(row=1, column=1, sticky="e", padx=(0, 2))
+        self._update_gain_label()
+
+        # Noise gate slider (0 = off)
+        tk.Label(parent, text="Noise Gate", bg=CLR["surface"], fg=CLR["text_dim"],
+                 font=(FONT_FAMILY, 9)).grid(row=2, column=0, sticky="w", padx=14)
+        self._gate_scale = tk.Scale(
+            parent, from_=0.0, to=0.10, resolution=0.005, orient="horizontal",
+            bg=CLR["surface"], fg=CLR["text"], troughcolor=CLR["surface2"],
+            highlightthickness=0, bd=0, length=170, showvalue=False,
+            activebackground=CLR["accent"], sliderrelief="flat",
+            command=self._on_gate_change,
+        )
+        self._gate_scale.set(self._gate_var.get())
+        self._gate_scale.grid(row=2, column=1, sticky="w", padx=(4, 10))
+        self._gate_val_lbl = tk.Label(parent, text="", bg=CLR["surface"],
+                                      fg=CLR["text_dim"], font=(FONT_FAMILY, 8), width=5)
+        self._gate_val_lbl.grid(row=2, column=1, sticky="e", padx=(0, 2))
+        self._update_gate_label()
+
+        # Right column: toggles + record
+        ttk.Checkbutton(parent, text="Mute  (Ctrl+Alt+M)", variable=self._mute_var,
+                        command=self._toggle_mute).grid(
+                            row=1, column=2, sticky="w", padx=(10, 0))
+        ttk.Checkbutton(parent, text="Monitor  (Ctrl+Alt+S)", variable=self._monitor_var,
+                        command=self._toggle_monitor).grid(
+                            row=2, column=2, sticky="w", padx=(10, 14))
+
+        self._rec_btn = ttk.Button(parent, text="⏺  Record", style="Record.TButton",
+                                   command=self._toggle_record)
+        self._rec_btn.grid(row=1, column=3, sticky="e", padx=14)
+        self._rec_lbl = tk.Label(parent, text="", bg=CLR["surface"],
+                                 fg=CLR["red"], font=(FONT_FAMILY, 8))
+        self._rec_lbl.grid(row=2, column=3, sticky="e", padx=14, pady=(0, 8))
+
+        tk.Label(parent, text="", bg=CLR["surface"]).grid(row=3, column=0)
+
     def _build_controls(self, parent):
         self._toggle_btn = ttk.Button(
             parent, text="⏹  Stop Server", style="Stop.TButton",
@@ -377,6 +519,11 @@ class App(tk.Tk):
         ttk.Button(
             parent, text="📋  View Log File", style="Ghost.TButton",
             command=lambda: os.startfile(LOG_FILE),
+        ).pack(side="left", padx=(8, 0))
+
+        ttk.Button(
+            parent, text="📂  Recordings", style="Ghost.TButton",
+            command=self._open_recordings,
         ).pack(side="left", padx=(8, 0))
 
         self._connected_from_var = tk.StringVar(value="")
@@ -394,6 +541,13 @@ class App(tk.Tk):
         ttk.Checkbutton(
             parent, text="Minimise to tray on close",
             variable=self._minimize_tray,
+            command=self._persist_options,
+        ).pack(side="left", padx=(16, 0))
+
+        ttk.Checkbutton(
+            parent, text="Start with Windows",
+            variable=self._autostart_win,
+            command=self._sync_autostart_win,
         ).pack(side="left", padx=(16, 0))
 
     # ── Server Control ─────────────────────────────────────────────────────────
@@ -409,6 +563,10 @@ class App(tk.Tk):
             on_stats=self._on_stats,
             on_vbcable_missing=self._on_vbcable_missing,
         )
+        self._server.set_gain(self._gain_var.get())
+        self._server.set_noise_gate(self._gate_var.get())
+        self._server.set_mute(self._mute_var.get())
+        self._server.set_monitor(self._monitor_var.get())
         self._server.start()
         self._server_running = True
         self._toggle_btn.configure(text="⏹  Stop Server", style="Stop.TButton")
@@ -416,6 +574,8 @@ class App(tk.Tk):
             self._tray.set_server_label("Stop Server")
 
     def _stop_server(self):
+        if self._recording:
+            self._toggle_record()
         if self._server:
             self._server.stop()
             self._server = None
@@ -429,6 +589,177 @@ class App(tk.Tk):
             self._stop_server()
         else:
             self._start_server()
+
+    # ── DSP handlers ───────────────────────────────────────────────────────────
+
+    def _on_gain_change(self, _):
+        val = float(self._gain_scale.get())
+        self._gain_var.set(val)
+        self._update_gain_label()
+        if self._server:
+            self._server.set_gain(val)
+        self._persist_options()
+
+    def _on_gate_change(self, _):
+        val = float(self._gate_scale.get())
+        self._gate_var.set(val)
+        self._update_gate_label()
+        if self._server:
+            self._server.set_noise_gate(val)
+        self._persist_options()
+
+    def _update_gain_label(self):
+        self._gain_val_lbl.configure(text=f"{self._gain_var.get():.2f}×")
+
+    def _update_gate_label(self):
+        v = self._gate_var.get()
+        self._gate_val_lbl.configure(text="off" if v <= 0 else f"{v:.3f}")
+
+    def _toggle_mute(self):
+        self._mute_var.set(not self._mute_var.get())
+        if self._server:
+            self._server.set_mute(self._mute_var.get())
+        self._append_log(f"Mute {'ON' if self._mute_var.get() else 'OFF'}")
+
+    def _toggle_monitor(self):
+        self._monitor_var.set(not self._monitor_var.get())
+        if self._server:
+            self._server.set_monitor(self._monitor_var.get())
+        self._persist_options()
+        self._append_log(f"Monitor {'ON' if self._monitor_var.get() else 'OFF'}")
+
+    # ── Recording ──────────────────────────────────────────────────────────────
+
+    def _toggle_record(self):
+        if self._recording:
+            dur = self._server.stop_recording() if self._server else 0.0
+            self._recording = False
+            self._rec_btn.configure(text="⏺  Record")
+            self._rec_lbl.configure(text="")
+            self._append_log(f"Recording saved ({dur:.1f}s) → {RECORDINGS_DIR}")
+        else:
+            if not self._server_running:
+                messagebox.showinfo("Not running", "Start the server first.")
+                return
+            os.makedirs(RECORDINGS_DIR, exist_ok=True)
+            fname = f"wirelessmic_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+            if self._server.start_recording(os.path.join(RECORDINGS_DIR, fname)):
+                self._recording = True
+                self._rec_t0 = time.time()
+                self._rec_btn.configure(text="⏹  Stop Rec")
+                self._append_log(f"Recording → {fname}")
+
+    def _rec_timer_loop(self):
+        if self._recording:
+            self._rec_lbl.configure(text=f"● REC {time.time() - self._rec_t0:.0f}s")
+        self.after(500, self._rec_timer_loop)
+
+    def _open_recordings(self):
+        os.makedirs(RECORDINGS_DIR, exist_ok=True)
+        os.startfile(RECORDINGS_DIR)
+
+    # ── Hotkeys (global, best-effort) ──────────────────────────────────────────
+
+    def _register_hotkeys(self):
+        try:
+            import keyboard
+            keyboard.add_hotkey("ctrl+alt+m", lambda: self.after(0, self._toggle_mute))
+            keyboard.add_hotkey("ctrl+alt+r", lambda: self.after(0, self._toggle_record))
+            keyboard.add_hotkey("ctrl+alt+s", lambda: self.after(0, self._toggle_monitor))
+            self._hotkeys_ok = True
+            self._append_log("Global hotkeys: Ctrl+Alt+M mute • Ctrl+Alt+R record • Ctrl+Alt+S monitor")
+        except Exception as e:
+            self._append_log(f"Global hotkeys unavailable ({e}); in-app hotkeys active.")
+
+    # ── QR pairing ─────────────────────────────────────────────────────────────
+
+    def _show_qr(self):
+        try:
+            import qrcode
+            from PIL import ImageTk
+        except ImportError:
+            messagebox.showwarning(
+                "QR unavailable",
+                "The 'qrcode' package is missing.\nRun:  pip install qrcode[pil]"
+            )
+            return
+
+        payload = json.dumps({
+            "app":  "wirelessmic",
+            "ip":   self._ip_var.get(),
+            "port": UDP_PORT,
+            "pin":  self._pin_var.get(),
+        })
+
+        win = tk.Toplevel(self)
+        win.title("Pair with Android")
+        win.configure(bg=CLR["surface"])
+        win.resizable(False, False)
+        win.attributes("-topmost", True)
+
+        tk.Label(win, text="Scan with Wireless Mic app → Scan QR",
+                 bg=CLR["surface"], fg=CLR["text"],
+                 font=(FONT_FAMILY, 11, "bold"), pady=10).pack()
+
+        img = qrcode.make(payload).resize((260, 260))
+        self._qr_photo = ImageTk.PhotoImage(img)
+        tk.Label(win, image=self._qr_photo, bg="white", bd=0).pack(padx=24, pady=(0, 4))
+
+        tk.Label(win,
+                 text=f"IP {self._ip_var.get()}   •   PIN {self._pin_var.get()}   •   UDP {UDP_PORT}",
+                 bg=CLR["surface"], fg=CLR["text_muted"],
+                 font=(FONT_FAMILY, 9), pady=10).pack()
+
+    def _new_pin(self):
+        new_pin = f"{random.randint(1000, 9999):04d}"
+        self._pin_var.set(new_pin)
+        self._cfg["pin"] = new_pin
+        save_config(self._cfg)
+        if self._server:
+            self._append_log("PIN changed — restart the server to apply it.")
+        else:
+            self._append_log(f"New PIN: {new_pin}")
+
+    # ── Auto-start with Windows ────────────────────────────────────────────────
+
+    def _autostart_command(self) -> str:
+        if getattr(sys, "frozen", False):  # PyInstaller exe
+            return f'"{sys.executable}"'
+        pythonw = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
+        if not os.path.exists(pythonw):
+            pythonw = sys.executable
+        return f'"{pythonw}" "{os.path.abspath(__file__)}"'
+
+    def _sync_autostart_win(self, silent: bool = False):
+        want = self._autostart_win.get()
+        try:
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, AUTOSTART_RUN_KEY, 0,
+                                 winreg.KEY_SET_VALUE)
+            if want:
+                winreg.SetValueEx(key, AUTOSTART_NAME, 0, winreg.REG_SZ,
+                                  self._autostart_command())
+            else:
+                try:
+                    winreg.DeleteValue(key, AUTOSTART_NAME)
+                except FileNotFoundError:
+                    pass
+            winreg.CloseKey(key)
+            self._cfg["autostart_windows"] = want
+            save_config(self._cfg)
+            if not silent:
+                self._append_log(f"Start with Windows: {'ON' if want else 'OFF'}")
+        except Exception as e:
+            if not silent:
+                messagebox.showerror("Autostart", f"Could not update registry:\n{e}")
+
+    def _persist_options(self):
+        self._cfg["always_on_top"] = self._always_on_top.get()
+        self._cfg["minimize_tray"] = self._minimize_tray.get()
+        self._cfg["gain"]          = self._gain_var.get()
+        self._cfg["gate"]          = self._gate_var.get()
+        self._cfg["monitor"]       = self._monitor_var.get()
+        save_config(self._cfg)
 
     # ── VB-Cable Auto-Install ───────────────────────────────────────────────
 
@@ -551,7 +882,6 @@ class App(tk.Tk):
             self._connected = True
             self._status_var.set("Connected")
             self._status_led.itemconfig(self._led_circle, fill=CLR["green"])
-            self._connected_from_var.set(f"📱  {addr}")
             if self._tray:
                 self._tray.update_status(True)
                 self._tray.notify("Wireless Mic", f"Android connected from {addr}")
@@ -575,11 +905,17 @@ class App(tk.Tk):
 
     def _on_stats(self, stats: dict):
         def _update():
-            recv = stats.get("packets_received", 0)
-            drop = stats.get("packets_dropped", 0)
-            up   = stats.get("uptime", 0)
+            senders = stats.get("senders", 0)
+            loss    = stats.get("loss_pct", 0.0)
+            jitter  = stats.get("jitter_ms", 0.0)
+            mb      = stats.get("bytes_received", 0) / 1024 / 1024
+            up      = stats.get("uptime", 0)
+            self._connected_from_var.set(
+                f"📱 {senders} device(s)" if senders else "")
             self._stats_label.configure(
-                text=f"Recv: {recv}  Drop: {drop}  Up: {up:.0f}s"
+                text=f"Recv: {stats.get('packets_received', 0)}  "
+                     f"Loss: {loss:.1f}%  Jitter: {jitter:.0f}ms  "
+                     f"{mb:.1f}MB  Up: {up:.0f}s"
             )
         self.after(0, _update)
 
@@ -657,6 +993,7 @@ class App(tk.Tk):
 
     def _toggle_topmost(self):
         self.attributes("-topmost", self._always_on_top.get())
+        self._persist_options()
 
     # ── IP Monitor ─────────────────────────────────────────────────────────────
 
@@ -698,8 +1035,17 @@ class App(tk.Tk):
             self._on_exit()
 
     def _on_exit(self):
+        self._persist_options()
+        if self._recording:
+            self._toggle_record()
         if self._server_running:
             self._stop_server()
+        if self._hotkeys_ok:
+            try:
+                import keyboard
+                keyboard.unhook_all()
+            except Exception:
+                pass
         if self._ip_monitor:
             self._ip_monitor.stop()
         if self._tray:

@@ -1,10 +1,13 @@
 package com.wirelessmic.audio
 
 import android.content.Context
+import android.media.AudioDeviceInfo
 import android.media.AudioFormat
+import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
@@ -23,6 +26,7 @@ class AudioRecordPlugin : FlutterPlugin {
     private var wakeLock: PowerManager.WakeLock? = null
     private var wifiLock: WifiManager.WifiLock? = null
     private var appContext: Context? = null
+    @Volatile private var useBluetoothMic = false
 
     companion object {
         private const val EVENT_CHANNEL = "com.wirelessmic/audio_stream"
@@ -57,6 +61,12 @@ class AudioRecordPlugin : FlutterPlugin {
                 "getMinBufferSize" -> {
                     val minBuf = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT)
                     result.success(minBuf)
+                }
+                "setInputSource" -> {
+                    val bt = call.argument<Boolean>("bluetooth") ?: false
+                    useBluetoothMic = bt
+                    if (bt && isRecording.get()) activateBluetoothSco()
+                    result.success(true)
                 }
                 else -> result.notImplemented()
             }
@@ -112,8 +122,56 @@ class AudioRecordPlugin : FlutterPlugin {
         wifiLock = null
     }
 
+    private fun activateBluetoothSco() {
+        val ctx = appContext ?: return
+        try {
+            val audioManager = ctx.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val devices = audioManager.availableCommunicationDevices
+                val btDevice = devices.firstOrNull {
+                    it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||
+                    it.type == AudioDeviceInfo.TYPE_BLE_HEADSET
+                }
+                if (btDevice != null) {
+                    audioManager.setCommunicationDevice(btDevice)
+                }
+            } else {
+                audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
+                @Suppress("DEPRECATION")
+                audioManager.startBluetoothSco()
+                @Suppress("DEPRECATION")
+                audioManager.isBluetoothScoOn = true
+            }
+        } catch (_: Exception) {
+            // best effort
+        }
+    }
+
+    private fun deactivateBluetoothSco() {
+        val ctx = appContext ?: return
+        try {
+            val audioManager = ctx.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                audioManager.clearCommunicationDevice()
+            } else {
+                @Suppress("DEPRECATION")
+                audioManager.stopBluetoothSco()
+                @Suppress("DEPRECATION")
+                audioManager.isBluetoothScoOn = false
+                audioManager.mode = AudioManager.MODE_NORMAL
+            }
+        } catch (_: Exception) {
+        }
+    }
+
     private fun startRecording(events: EventChannel.EventSink) {
         if (isRecording.get()) return
+
+        val source = if (useBluetoothMic) {
+            MediaRecorder.AudioSource.VOICE_COMMUNICATION
+        } else {
+            MediaRecorder.AudioSource.MIC
+        }
 
         val minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT)
         if (minBufferSize == AudioRecord.ERROR || minBufferSize == AudioRecord.ERROR_BAD_VALUE) {
@@ -127,7 +185,7 @@ class AudioRecordPlugin : FlutterPlugin {
 
         try {
             audioRecord = AudioRecord(
-                MediaRecorder.AudioSource.MIC,
+                source,
                 SAMPLE_RATE,
                 CHANNEL_CONFIG,
                 AUDIO_FORMAT,
@@ -151,6 +209,8 @@ class AudioRecordPlugin : FlutterPlugin {
 
         // Acquire wake + wifi locks before starting recording
         acquireLocks()
+
+        if (useBluetoothMic) activateBluetoothSco()
 
         isRecording.set(true)
         audioRecord?.startRecording()
@@ -193,6 +253,8 @@ class AudioRecordPlugin : FlutterPlugin {
 
     private fun stopRecording() {
         isRecording.set(false)
+
+        if (useBluetoothMic) deactivateBluetoothSco()
 
         try {
             audioThread?.join(2000)

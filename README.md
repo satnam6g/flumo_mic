@@ -38,6 +38,14 @@ Windows (GUI Client) → AES-256 Decryption → PyAudio → VB-Cable (Virtual Mi
 
 ---
 
+## 📸 Application Screenshots
+
+| Windows Desktop Client (Receiver) | Android Mobile App (Sender) |
+| :---: | :---: |
+| <img src="website/assets/screenshots/windows-client.png" width="480" alt="Windows Desktop Client GUI"> | <img src="website/assets/screenshots/android-app.jpg" width="240" alt="Android App Interface"> |
+
+---
+
 ## ⚙️ Prerequisites
 
 ### Android Requirements

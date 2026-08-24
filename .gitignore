@@ -38,3 +38,6 @@ Thumbs.db
 .env
 website/
 
+
+# Local release artifacts
+releases/
