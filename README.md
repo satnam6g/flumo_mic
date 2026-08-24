@@ -54,7 +54,7 @@ Windows Client → AES-256 Decryption → DSP (gate/gain) → VB-Cable (Virtual 
 
 | Windows Desktop Client (Receiver) | Android Mobile App (Sender) |
 | :---: | :---: |
-| <img src="website/assets/screenshots/windows-client.png" width="480" alt="Windows Desktop Client GUI"> | <img src="website/assets/screenshots/android-app.jpg" width="240" alt="Android App Interface"> |
+| <img src="docs/screenshots/windows-client.png" width="480" alt="Windows Desktop Client GUI"> | <img src="docs/screenshots/android-app.jpg" width="240" alt="Android App Interface"> |
 
 ---
 

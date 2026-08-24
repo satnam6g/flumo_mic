@@ -21,7 +21,7 @@
 
 ## 📸 Client Interface
 
-![Wireless Mic Windows Client](../website/assets/screenshots/windows-client.png)
+![Wireless Mic Windows Client](../docs/screenshots/windows-client.png)
 
 ---
 
