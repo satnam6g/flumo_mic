@@ -1,7 +1,21 @@
 # Wireless Mic — Windows Client
 
-> Use your Android phone as a wireless microphone on your Windows PC.  
-> Audio streams over Wi-Fi via UDP — zero compression, ultra-low latency.
+> Use your Android phone as a wireless microphone on your Windows PC.
+> Encrypted audio (AES-256) streams over Wi-Fi via UDP — routed into any app through VB-Cable.
+
+---
+
+## Features (v2.0)
+
+- **Persistent security PIN** — same code every launch, regenerate anytime
+- **QR pairing** — show a QR code for the Android app to scan (IP + PIN + port)
+- **Audio controls** — gain (0.5x–3x), noise gate, mute, live monitor
+- **Recording** — one-click WAV captures, auto-timestamped
+- **Multi-device** — several phones can stream at once (auto-mixed)
+- **Live stats** — packets, loss %, jitter, MB, uptime
+- **Global hotkeys** — Ctrl+Alt+M mute / Ctrl+Alt+R record / Ctrl+Alt+S monitor
+- **Auto-start with Windows** + system tray with notifications
+- **VB-Cable auto-detect & install helper**
 
 ---
 
@@ -79,7 +93,7 @@ The app will:
 
 ### 3. Connect the Android app
 
-In the Wireless Mic Android app, enter the IP address shown in the Windows client and tap **Start Streaming**.
+In the Wireless Mic Android app, tap the QR icon and scan the code from the Windows client (or enter the IP + PIN manually), then tap **Start**.
 
 ---
 
