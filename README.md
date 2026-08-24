@@ -76,7 +76,7 @@ Windows Client → AES-256 Decryption → DSP (gate/gain) → VB-Cable (Virtual 
 ### 1. Windows Client
 
 **Option A — Installer (recommended)**
-1. Download and run `WirelessMic_Setup.exe` from the latest GitHub Release.
+1. Download [`WirelessMic_Setup-v2.0.exe`](https://github.com/satnam6g/flumo_mic/releases/latest) from the latest GitHub Release.
 2. Launch **Wireless Mic Client** — it shows your IP, PIN, and a QR code.
 
 **Option B — From source**
@@ -89,7 +89,8 @@ python src/main.py
 ### 2. Android App
 
 **Option A — APK**
-1. Download `app-release.apk` from the latest GitHub Release and install it.
+1. Download [`WirelessMic-Android-v2.0.apk`](https://github.com/satnam6g/flumo_mic/releases/latest) from the latest GitHub Release and install it.
+2. Upgrading from v1.x? Uninstall the old app first (signing changed in v2.0).
 
 **Option B — From source**
 ```powershell
