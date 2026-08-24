@@ -41,3 +41,10 @@ website/
 
 # Local release artifacts
 releases/
+
+# Internal docs & bundled tools (not source)
+DEBUG_LOG.md
+DESIGN_SYSTEM.md
+ROADMAP.md
+VBCABLE_Driver_Pack45/
+inno/
