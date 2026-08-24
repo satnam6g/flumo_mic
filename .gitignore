@@ -48,3 +48,13 @@ DESIGN_SYSTEM.md
 ROADMAP.md
 VBCABLE_Driver_Pack45/
 inno/
+
+# website: only screenshots are tracked (referenced by README)
+website/*
+!website/assets/
+website/assets/*
+!website/assets/screenshots/
+
+# flutter subproject caches
+android_app/android/.gradle/
+android_app/android/local.properties
