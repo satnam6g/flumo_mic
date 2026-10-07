@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation — How to Set Up Wireless Mic for Android & Windows</title>
+    <meta name="description" content="Complete setup guide for Wireless Mic. Learn how to install the Windows client, configure VB-Audio Virtual Cable, connect your Android phone, and troubleshoot common issues.">
+    <meta name="keywords" content="wireless mic setup guide, how to use phone as microphone, VB-Audio Virtual Cable setup, android to windows mic tutorial">
+
+    <link rel="canonical" href="https://mic.infinityfreeapp.com/documentation.html" />
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Wireless Mic Documentation — Setup Guide" />
+    <meta property="og:description" content="Step-by-step guide to set up Wireless Mic and use your Android phone as a microphone for Windows." />
+    <meta property="og:url" content="https://mic.infinityfreeapp.com/documentation.html" />
+    <meta property="og:site_name" content="Wireless Mic" />
+    <meta property="og:image" content="https://mic.infinityfreeapp.com/assets/screenshots/windows-client.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Wireless Mic — Setup Documentation" />
+
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mic.infinityfreeapp.com/"},{"@type":"ListItem","position":2,"name":"Documentation","item":"https://mic.infinityfreeapp.com/documentation.html"}]}
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="noise-bg"></div>
+    <div id="scroll-progress"></div>
+
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" aria-label="Wireless Mic Home"><i data-lucide="mic" class="text-primary-c"></i> Wireless Mic</a>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html#features">Features</a>
+                <a href="security.html">Security</a>
+                <a href="download.html">Download</a>
+                <a href="documentation.html" class="active">Docs</a>
+                <a href="faq.html">FAQ</a>
+                <a href="community.html">Community</a>
+            </div>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"><i data-lucide="sun" class="light-icon"></i><i data-lucide="moon" class="dark-icon"></i></button>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu"><i data-lucide="menu"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-hero">
+            <div class="hero-bg-gradient"></div>
+            <div class="container">
+                <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="separator">/</span><span class="current">Documentation</span></nav>
+                <h1>Setup <span class="text-gradient">Documentation</span></h1>
+                <p>Everything you need to install, configure, and start using Wireless Mic in under 5 minutes. Follow the step-by-step guide below.</p>
+            </div>
+        </section>
+
+        <section class="page-content">
+            <div class="container">
+                <!-- Step 1 -->
+                <div class="content-card animate-up" id="install-windows">
+                    <h2>Step 1: Install the Windows Client</h2>
+                    <ol>
+                        <li><a href="download.html">Download the Windows installer</a> (<code>WirelessMic_Setup-v2.0.exe</code>) from the download page.</li>
+                        <li>Run the installer. It will set up Python dependencies and VB-Audio Virtual Cable automatically.</li>
+                        <li>If prompted by Windows Defender SmartScreen, click <strong>"More info"</strong> → <strong>"Run anyway"</strong>. The app is open-source and safe — you can <a href="https://github.com/satnam6g/flumo_mic" target="_blank" rel="noopener">verify the source code on GitHub</a>.</li>
+                        <li>Launch the Wireless Mic Client. It will display your PC's local IP address, your persistent 4-digit PIN, and a QR code (click "Show QR").</li>
+                    </ol>
+                    <img src="assets/screenshots/windows-client.png" alt="Wireless Mic Windows desktop client for receiving encrypted microphone audio" style="width:100%; max-width:500px; border-radius:8px; margin-top:1rem; border:1px solid var(--border-color);" loading="lazy">
+                </div>
+
+                <!-- Step 2 -->
+                <div class="content-card animate-up" id="install-android">
+                    <h2>Step 2: Install the Android App</h2>
+                    <ol>
+                        <li><a href="download.html">Download the Android APK</a> (<code>WirelessMic-Android-v2.0.apk</code>) from the download page.</li>
+                        <li>Open the APK file on your Android device. You may need to enable <strong>"Install from unknown sources"</strong> in your settings.</li>
+                        <li>Grant microphone permission when prompted — this is required for audio capture.</li>
+                        <li>Open the app. Tap the QR icon to scan the code from the Windows client - IP and PIN fill in automatically (or type them manually).</li>
+                    </ol>
+                    <img src="assets/screenshots/android-app.jpg" alt="Wireless Mic Android app interface for turning your phone into a secure microphone" style="width:100%; max-width:250px; border-radius:16px; margin-top:1rem; border:8px solid #17171a;" loading="lazy">
+                </div>
+
+                <!-- Step 3 -->
+                <div class="content-card animate-up" id="connect">
+                    <h2>Step 3: Connect & Stream</h2>
+                    <ol>
+                        <li>Make sure both your Android phone and Windows PC are on the <strong>same Wi-Fi network</strong>.</li>
+                        <li>On the Android app, enter the <strong>IP address</strong> shown on the Windows client.</li>
+                        <li>Enter the <strong>4-digit PIN</strong> displayed on the Windows client. This establishes the <a href="security.html">AES-256 encrypted connection</a>.</li>
+                        <li>Tap <strong>"Start"</strong> on the Android app. Audio will begin streaming immediately.</li>
+                        <li>On your PC, the Wireless Mic Server will show real-time status — packets received, audio levels, and connection quality.</li>
+                    </ol>
+                </div>
+
+                <!-- VB-Cable Setup -->
+                <div class="content-card animate-up" id="vb-cable">
+                    <h2>Configuring VB-Audio Virtual Cable</h2>
+                    <p>VB-Audio Virtual Cable creates a virtual audio device that routes the streamed audio to any application on your PC. This is what allows Wireless Mic to work with Zoom, Discord, OBS, and other apps.</p>
+                    <h3>Setting as Default Microphone</h3>
+                    <ol>
+                        <li>Open <strong>Windows Sound Settings</strong> (right-click the speaker icon in your taskbar → "Sound settings").</li>
+                        <li>Under <strong>Input</strong>, select <strong>"CABLE Output (VB-Audio Virtual Cable)"</strong> as your default microphone.</li>
+                        <li>Now any application that uses the default microphone will receive audio from your Android phone.</li>
+                    </ol>
+                    <h3>Per-App Configuration</h3>
+                    <p>If you don't want to change your system default, you can select VB-Audio Cable as the microphone input inside individual applications:</p>
+                    <ul>
+                        <li><strong>Zoom:</strong> Settings → Audio → Microphone → "CABLE Output"</li>
+                        <li><strong>Discord:</strong> Settings → Voice & Video → Input Device → "CABLE Output"</li>
+                        <li><strong>OBS Studio:</strong> Sources → Audio Input Capture → "CABLE Output"</li>
+                        <li><strong>Google Meet:</strong> Settings → Audio → Microphone → "CABLE Output"</li>
+                        <li><strong>Audacity:</strong> Toolbar → Microphone dropdown → "CABLE Output"</li>
+                    </ul>
+                </div>
+
+                <!-- USB Tethering -->
+                <div class="content-card animate-up" id="usb-tethering">
+                    <h2>Using USB Tethering (Alternative to Wi-Fi)</h2>
+                    <p>If you experience Wi-Fi instability or want the lowest possible latency, you can use USB tethering:</p>
+                    <ol>
+                        <li>Connect your Android phone to your PC with a USB cable.</li>
+                        <li>On your Android device, go to <strong>Settings → Network → Hotspot & Tethering → USB Tethering</strong> and enable it.</li>
+                        <li>Your PC will get a new network interface. Use the IP address assigned to that interface in the Android app.</li>
+                        <li>Enter the PIN and start streaming as usual.</li>
+                    </ol>
+                    <p>USB tethering provides a direct, dedicated connection with minimal latency and no Wi-Fi interference.</p>
+                </div>
+
+                <!-- Windows Client Features -->
+                <div class="content-card animate-up" id="desktop-features">
+                    <h2>Windows Client Features</h2>
+                    <ul>
+                        <li><strong>Global hotkeys:</strong> <code>Ctrl+Alt+M</code> mute/unmute &middot; <code>Ctrl+Alt+R</code> start/stop recording &middot; <code>Ctrl+Alt+S</code> monitor on/off.</li>
+                        <li><strong>Recording:</strong> One-click WAV recording — files are saved to <code>Music\WirelessMic</code> with auto-timestamped names.</li>
+                        <li><strong>System tray:</strong> Closing the window minimises to the tray so streaming keeps running in the background, with desktop notifications.</li>
+                        <li><strong>Auto-start:</strong> Optionally launch with Windows (per-user setting).</li>
+                        <li><strong>Multi-phone mixing:</strong> Several phones can stream to the same PC simultaneously — the audio is mixed into the cable.</li>
+                        <li><strong>Live stats:</strong> Packets received, loss %, jitter (ms), MB streamed, uptime, and connected devices.</li>
+                    </ul>
+                </div>
+
+                <!-- Troubleshooting -->
+                <div class="content-card animate-up" id="troubleshooting">
+                    <h2>Troubleshooting</h2>
+                    <h3>Connection Issues</h3>
+                    <ul>
+                        <li><strong>"Cannot connect"</strong> — Verify both devices are on the same Wi-Fi network. Check your firewall isn't blocking UDP port 55555. The Windows network profile must be set to <strong>Private</strong> — Public networks block inbound UDP.</li>
+                        <li><strong>"Invalid PIN"</strong> — Re-check the PIN on the Windows client. The PIN is persistent - it only changes if you press "New" in the client.</li>
+                        <li><strong>Phone shows "Sending" but PC says "Waiting"</strong> — The phone is likely streaming to an old saved IP address. Re-scan the QR code or retype the current IP shown on the client (UDP gives no delivery feedback, so the phone's counter climbs even when packets go nowhere).</li>
+                        <li><strong>Client can't start / second instance gets nothing</strong> — Only one receiver can bind UDP port 55555. Close any other running instance of the Wireless Mic client.</li>
+                        <li><strong>No audio coming through</strong> — Ensure VB-Audio Virtual Cable is installed and apps are selecting <strong>CABLE Output</strong> as the microphone (not CABLE Input). Check the <a href="#vb-cable">VB-Cable configuration section</a>.</li>
+                    </ul>
+                    <h3>Audio Quality Issues</h3>
+                    <ul>
+                        <li><strong>Choppy audio</strong> — Your Wi-Fi signal may be weak or congested. Move closer to your router, prefer a 5 GHz network, or switch to <a href="#usb-tethering">USB tethering</a>.</li>
+                        <li><strong>High latency</strong> — Close bandwidth-heavy applications. Wireless Mic streams uncompressed PCM (~768 kbps), but network congestion can introduce delays. Check loss/jitter in the client's stats bar.</li>
+                        <li><strong>Echo or feedback</strong> — Ensure your PC speakers are muted or that you're using headphones to prevent the microphone from picking up its own output.</li>
+                        <li><strong>Stream stops when the phone screen locks</strong> — Disable battery optimization for Wireless Mic (Settings → Apps → Wireless Mic → Battery → Allow background activity).</li>
+                    </ul>
+                    <p>Still having issues? <a href="community.html">Visit our community page</a> to ask for help or <a href="https://github.com/satnam6g/flumo_mic/issues" target="_blank" rel="noopener">report a bug on GitHub</a>.</p>
+                </div>
+
+                <div class="cta-banner animate-up">
+                    <h2>Ready to Download?</h2>
+                    <p>Get Wireless Mic for free — no accounts, no subscriptions.</p>
+                    <div class="btn-group">
+                        <a href="download.html" class="btn btn-primary"><i data-lucide="download"></i> Download Now</a>
+                        <a href="faq.html" class="btn btn-secondary"><i data-lucide="help-circle"></i> FAQ</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-col brand-col"><a href="index.html" class="logo"><i data-lucide="mic" class="text-primary-c"></i> Wireless Mic</a><p class="footer-tagline">Turn your Android phone into a high-quality, encrypted wireless microphone for your Windows PC.</p><div class="footer-links"><a href="index.html#features">Features</a><a href="security.html">Security</a><a href="download.html">Download</a><a href="documentation.html">Documentation</a></div></div>
+                <div class="footer-col"><h4>Resources</h4><div class="footer-links"><a href="documentation.html">Documentation</a><a href="wiki.html">Wiki</a><a href="faq.html">FAQ</a><a href="community.html">Community</a></div></div>
+                <div class="footer-col"><h4>Legal</h4><div class="footer-links"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="license.html">License (MIT)</a></div></div>
+                <div class="footer-col"><h4>Connect</h4><div class="social-icons"><a href="https://github.com/satnam6g/flumo_mic" target="_blank" rel="noopener" aria-label="GitHub"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a></div><div class="footer-links"><a href="https://github.com/satnam6g/flumo_mic/discussions/1" target="_blank" rel="noopener">Discussions</a><a href="https://github.com/satnam6g/flumo_mic/issues" target="_blank" rel="noopener">Report a Bug</a></div></div>
+            </div>
+            <div class="footer-middle"><div class="trust-badges"><span class="trust-badge"><i data-lucide="lock" class="text-accent"></i> AES-256 Encrypted</span><span class="trust-badge"><i data-lucide="shield-check" class="text-accent"></i> Privacy-First</span><span class="trust-badge"><i data-lucide="check-circle" class="text-accent"></i> Open Source</span><span class="trust-badge"><i data-lucide="wifi" class="text-accent"></i> Local Network Only</span></div></div>
+            <div class="footer-bottom"><div class="copyright-info"><p>&copy; 2024-2026 Wireless Mic. <a href="license.html">MIT License</a>.</p><p>Built with ❤️ using Flutter & Python</p></div><div class="bottom-actions"><span class="version-info">v2.0.1</span><button class="theme-toggle bottom-theme-toggle" id="bottomThemeToggle" aria-label="Toggle theme"><i data-lucide="sun" class="light-icon"></i><i data-lucide="moon" class="dark-icon"></i></button></div></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+</html>

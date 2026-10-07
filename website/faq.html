@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ — Wireless Mic Frequently Asked Questions</title>
+    <meta name="description" content="Answers to frequently asked questions about Wireless Mic. Learn about compatibility, security, latency, setup, troubleshooting, and more.">
+    <meta name="keywords" content="wireless mic FAQ, phone microphone questions, android mic for pc help, wireless mic troubleshooting">
+
+    <link rel="canonical" href="https://mic.infinityfreeapp.com/faq.html" />
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Wireless Mic — Frequently Asked Questions" />
+    <meta property="og:description" content="Find answers to common questions about using your Android phone as a wireless microphone for Windows." />
+    <meta property="og:url" content="https://mic.infinityfreeapp.com/faq.html" />
+    <meta property="og:site_name" content="Wireless Mic" />
+    <meta name="twitter:card" content="summary" />
+
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is Wireless Mic really free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Wireless Mic is 100% free and open-source under the MIT license. There are no ads, no subscriptions, no premium tiers, and no hidden costs."}},{"@type":"Question","name":"How secure is the audio transmission?","acceptedAnswer":{"@type":"Answer","text":"Every audio packet is encrypted with AES-256 CBC encryption. The key is derived from a random 4-digit PIN using SHA-256. A unique random IV is used per packet."}},{"@type":"Question","name":"Can I use this with Zoom, Discord, or OBS?","acceptedAnswer":{"@type":"Answer","text":"Yes. Wireless Mic registers as a standard Windows audio input via VB-Audio Virtual Cable. It works with Zoom, Discord, OBS Studio, Google Meet, Teams, Audacity, and any app that accepts microphone input."}},{"@type":"Question","name":"Do I need an internet connection?","acceptedAnswer":{"@type":"Answer","text":"No. Wireless Mic works entirely over your local Wi-Fi network or USB tethering. Audio data never leaves your local network."}},{"@type":"Question","name":"What is the audio latency?","acceptedAnswer":{"@type":"Answer","text":"Approximately 20ms using optimized UDP streaming — virtually imperceptible in real-time use."}},{"@type":"Question","name":"Which Android versions are supported?","acceptedAnswer":{"@type":"Answer","text":"Android 10.0 (API level 29) and higher."}},{"@type":"Question","name":"Which Windows versions are supported?","acceptedAnswer":{"@type":"Answer","text":"Windows 10 and Windows 11 (64-bit)."}},{"@type":"Question","name":"Does it work over USB?","acceptedAnswer":{"@type":"Answer","text":"Yes. You can use USB tethering as an alternative to Wi-Fi for even more stable, low-latency audio streaming."}},{"@type":"Question","name":"Is the source code available?","acceptedAnswer":{"@type":"Answer","text":"Yes. The full source code is available on GitHub under the MIT license at github.com/satnam6g/flumo_mic."}},{"@type":"Question","name":"How do I report a bug?","acceptedAnswer":{"@type":"Answer","text":"You can report bugs on the GitHub Issues page or discuss them in the GitHub Discussions forum."}}]}
+    </script>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mic.infinityfreeapp.com/"},{"@type":"ListItem","position":2,"name":"FAQ","item":"https://mic.infinityfreeapp.com/faq.html"}]}
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="noise-bg"></div>
+    <div id="scroll-progress"></div>
+
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" aria-label="Wireless Mic Home"><i data-lucide="mic" class="text-primary-c"></i> Wireless Mic</a>
+            <div class="nav-links" id="navLinks"><a href="index.html#features">Features</a><a href="security.html">Security</a><a href="download.html">Download</a><a href="documentation.html">Docs</a><a href="faq.html" class="active">FAQ</a><a href="community.html">Community</a></div>
+            <div class="nav-actions"><button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"><i data-lucide="sun" class="light-icon"></i><i data-lucide="moon" class="dark-icon"></i></button><button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu"><i data-lucide="menu"></i></button></div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-hero">
+            <div class="hero-bg-gradient"></div>
+            <div class="container">
+                <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="index.html">Home</a><span class="separator">/</span><span class="current">FAQ</span></nav>
+                <h1>Frequently Asked <span class="text-gradient">Questions</span></h1>
+                <p>Find answers to common questions about Wireless Mic. Can't find what you're looking for? <a href="community.html">Ask the community</a>.</p>
+            </div>
+        </section>
+
+        <section class="page-content">
+            <div class="container">
+                <div class="faq-grid animate-up">
+                    <div class="faq-item">
+                        <button class="faq-question" aria-expanded="false">Is Wireless Mic really free?<i data-lucide="chevron-down" class="faq-icon"></i></button>
+                        <div class="faq-answer"><div class="faq-answer-inner">Yes — Wireless Mic is 100% free and <a href="https://github.com/satnam6g/flumo_mic" target="_blank" rel="noopener">open-source under the MIT license</a>. There are no ads, no subscriptions, no premium tiers, no in-app purchases, and no hidden costs. You get every feature for free, forever. You can even inspect and modify the source code yourself.</div></div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question" aria-expanded="false">How secure is the audio transmission?<i data-lucide="chevron-down" class="faq-icon"></i></button>
+                        <div class="faq-answer"><div class="faq-answer-inner">Every audio packet is encrypted with <strong>AES-256 CBC</strong> encryption before leaving your phone. The encryption key is derived from a random 4-digit PIN using SHA-256, and each packet gets a unique random Initialization Vector (IV). This means even if someone intercepts your network traffic, the audio is completely unreadable. <a href="security.html">Read our full security breakdown →</a></div></div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question" aria-expanded="false">Can I use this with Zoom, Discord, or OBS?<i data-lucide="chevron-down" class="faq-icon"></i></button>
+                        <div class="faq-answer"><div class="faq-answer-inner">Absolutely. Wireless Mic registers as a standard Windows audio input device via <strong>VB-Audio Virtual Cable</strong>. Any application that accepts microphone input — including Zoom, Discord, OBS Studio, Google Meet, Microsoft Teams, Skype, Audacity, and hundreds more — will work seamlessly. <a href="documentation.html#vb-cable">See the VB-Cable configuration guide →</a></div></div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question" aria-expanded="false">Do I need an internet connection?<i data-lucide="chevron-down" class="faq-icon"></i></button>
+                        <div class="faq-answer"><div class="faq-answer-inner">No. Wireless Mic works entirely over your <strong>local Wi-Fi network</strong> or USB tethering. Your audio data never touches the internet, never passes through any cloud server, and never leaves your local network. This also means it works in air-gapped or offline environments. <a href="privacy.html">Read our privacy policy →</a></div></div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question" aria-expanded="false">What is the audio latency?<i data-lucide="chevron-down" class="faq-icon"></i></button>
+                        <div class="faq-answer"><div class="faq-answer-inner">Wireless Mic achieves approximately <strong>20 milliseconds</strong> of latency using optimized UDP streaming — that is virtually imperceptible in real-time conversations, live streaming, podcasting, and gaming. For comparison, Bluetooth microphones typically have 100-200ms of latency. <a href="wiki.html">Technical details →</a></div></div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question" aria-expanded="false">Which Android versions are supported?<i data-lucide="chevron-down" class="faq-icon"></i></button>
+                        <div class="faq-answer"><div class="faq-answer-inner">Wireless Mic supports <strong>Android 10.0 (API level 29)</strong> and higher. This covers the vast majority of Android devices currently in use. The app requires microphone permission and same-network connectivity. <a href="download.html">Check system requirements →</a></div></div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question" aria-expanded="false">Which Windows versions are supported?<i data-lucide="chevron-down" class="faq-icon"></i></button>
+                        <div class="faq-answer"><div class="faq-answer-inner"><strong>Windows 10</strong> and <strong>Windows 11</strong> (64-bit) are fully supported. The Windows client requires Python 3.10+ (bundled in the installer) and VB-Audio Virtual Cable (also included). <a href="download.html">Download the Windows client →</a></div></div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question" aria-expanded="false">Does it work over USB instead of Wi-Fi?<i data-lucide="chevron-down" class="faq-icon"></i></button>
+                        <div class="faq-answer"><div class="faq-answer-inner">Yes. You can use <strong>USB tethering</strong> as an alternative to Wi-Fi. Simply connect your phone to your PC with a USB cable, enable USB tethering on your Android device, and use the tethering IP address in the app. USB provides an even more stable, dedicated connection. <a href="documentation.html#usb-tethering">USB tethering guide →</a></div></div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question" aria-expanded="false">Is the source code available?<i data-lucide="chevron-down" class="faq-icon"></i></button>
+                        <div class="faq-answer"><div class="faq-answer-inner">Yes. The full source code is publicly available on GitHub at <a href="https://github.com/satnam6g/flumo_mic" target="_blank" rel="noopener">github.com/satnam6g/flumo_mic</a> under the <a href="license.html">MIT license</a>. You are free to use, modify, distribute, and contribute to the project. The Android app is built with Flutter and Kotlin, and the Windows client is built with Python.</div></div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question" aria-expanded="false">How do I report a bug or request a feature?<i data-lucide="chevron-down" class="faq-icon"></i></button>
+                        <div class="faq-answer"><div class="faq-answer-inner">You can report bugs on the <a href="https://github.com/satnam6g/flumo_mic/issues" target="_blank" rel="noopener">GitHub Issues page</a> or discuss ideas and feature requests in the <a href="https://github.com/satnam6g/flumo_mic/discussions/1" target="_blank" rel="noopener">GitHub Discussions forum</a>. We welcome all contributions and feedback from the community. <a href="community.html">Visit our community page →</a></div></div>
+                    </div>
+                </div>
+
+                <div class="cta-banner animate-up">
+                    <h2>Still Have Questions?</h2>
+                    <p>Join the community discussion or check the documentation for detailed guides.</p>
+                    <div class="btn-group">
+                        <a href="community.html" class="btn btn-primary"><i data-lucide="message-circle"></i> Community</a>
+                        <a href="documentation.html" class="btn btn-secondary"><i data-lucide="book-open"></i> Documentation</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-col brand-col"><a href="index.html" class="logo"><i data-lucide="mic" class="text-primary-c"></i> Wireless Mic</a><p class="footer-tagline">Turn your Android phone into a high-quality, encrypted wireless microphone for your Windows PC.</p><div class="footer-links"><a href="index.html#features">Features</a><a href="security.html">Security</a><a href="download.html">Download</a><a href="documentation.html">Documentation</a></div></div>
+                <div class="footer-col"><h4>Resources</h4><div class="footer-links"><a href="documentation.html">Documentation</a><a href="wiki.html">Wiki</a><a href="faq.html">FAQ</a><a href="community.html">Community</a></div></div>
+                <div class="footer-col"><h4>Legal</h4><div class="footer-links"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Service</a><a href="license.html">License (MIT)</a></div></div>
+                <div class="footer-col"><h4>Connect</h4><div class="social-icons"><a href="https://github.com/satnam6g/flumo_mic" target="_blank" rel="noopener" aria-label="GitHub"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a></div><div class="footer-links"><a href="https://github.com/satnam6g/flumo_mic/discussions/1" target="_blank" rel="noopener">Discussions</a><a href="https://github.com/satnam6g/flumo_mic/issues" target="_blank" rel="noopener">Report a Bug</a></div></div>
+            </div>
+            <div class="footer-middle"><div class="trust-badges"><span class="trust-badge"><i data-lucide="lock" class="text-accent"></i> AES-256 Encrypted</span><span class="trust-badge"><i data-lucide="shield-check" class="text-accent"></i> Privacy-First</span><span class="trust-badge"><i data-lucide="check-circle" class="text-accent"></i> Open Source</span><span class="trust-badge"><i data-lucide="wifi" class="text-accent"></i> Local Network Only</span></div></div>
+            <div class="footer-bottom"><div class="copyright-info"><p>&copy; 2024-2026 Wireless Mic. <a href="license.html">MIT License</a>.</p><p>Built with ❤️ using Flutter & Python</p></div><div class="bottom-actions"><span class="version-info">v2.0.1</span><button class="theme-toggle bottom-theme-toggle" id="bottomThemeToggle" aria-label="Toggle theme"><i data-lucide="sun" class="light-icon"></i><i data-lucide="moon" class="dark-icon"></i></button></div></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+</body>
+</html>

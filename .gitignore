@@ -36,8 +36,6 @@ Thumbs.db
 *.zip
 *.tar.gz
 .env
-website/
-
 
 # Local release artifacts
 releases/
@@ -49,7 +47,7 @@ ROADMAP.md
 VBCABLE_Driver_Pack45/
 inno/
 
-website/
+# Cloudflare Pages website is tracked in website/.
 
 # flutter subproject caches
 android_app/android/.gradle/
